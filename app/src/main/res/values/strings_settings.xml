@@ -38,7 +38,6 @@
     <string name="settings_battery_permission_description">Keep the app running reliably in the background</string>
     <string name="settings_permission_granted">Granted</string>
     <string name="settings_permission_grant">Grant</string>
-    <string name="settings_filter_title">Notification filters &amp; exclusions</string>
     <string name="settings_filter_description">Exclude apps or block notifications containing specific keywords</string>
     <string name="settings_filter_summary">Apps: %1$d · Blocked keywords: %2$d</string>
     <string name="settings_received_apps">Received apps (%1$d)</string>
@@ -52,4 +51,5 @@
     <string name="settings_add">Add</string>
     <string name="settings_blocked_keywords_empty">No blocked keywords added.</string>
     <string name="settings_remove_keyword">Remove keyword: %1$s</string>
+    <string name="settings_keyword_label">Keyword to block</string>
 </resources>

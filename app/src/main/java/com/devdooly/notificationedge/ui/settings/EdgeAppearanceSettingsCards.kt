@@ -2,7 +2,8 @@ package com.devdooly.notificationedge.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +43,7 @@ internal fun EdgeHandleSettingsCard(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = stringResource(R.string.appearance_handle_layout),
                 color = Color.White,
@@ -69,40 +73,22 @@ internal fun EdgeHandleSettingsCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // 채팅방 이동 시 해당 알림 자동 삭제 (기본값 ON)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.appearance_auto_dismiss), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    Text(stringResource(R.string.appearance_auto_dismiss_description), color = TextMuted, fontSize = 11.sp)
-                }
-                Switch(
-                    checked = settings.autoDismissOnOpen,
-                    onCheckedChange = onAutoDismissToggle,
-                    colors = SwitchDefaults.colors(checkedThumbColor = EdgeCyan)
-                )
-            }
+            SettingsToggleRow(
+                title = stringResource(R.string.appearance_auto_dismiss),
+                description = stringResource(R.string.appearance_auto_dismiss_description),
+                checked = settings.autoDismissOnOpen,
+                onCheckedChange = onAutoDismissToggle
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // 핸들 보이기 / 숨기기 (제스처 전용)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.appearance_handle_visible), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    Text(stringResource(R.string.appearance_handle_visible_description), color = TextMuted, fontSize = 11.sp)
-                }
-                Switch(
-                    checked = settings.isHandleVisible,
-                    onCheckedChange = onVisibleToggle,
-                    colors = SwitchDefaults.colors(checkedThumbColor = EdgeCyan)
-                )
-            }
+            SettingsToggleRow(
+                title = stringResource(R.string.appearance_handle_visible),
+                description = stringResource(R.string.appearance_handle_visible_description),
+                checked = settings.isHandleVisible,
+                onCheckedChange = onVisibleToggle
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -243,31 +229,13 @@ internal fun EdgeLightingSettingsCard(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.appearance_lighting),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = stringResource(R.string.appearance_lighting_description),
-                        color = TextMuted,
-                        fontSize = 12.sp
-                    )
-                }
-                Switch(
-                    checked = settings.isEdgeLightingEnabled,
-                    onCheckedChange = onLightingToggle,
-                    colors = SwitchDefaults.colors(checkedThumbColor = EdgeCyan)
-                )
-            }
+        Column(modifier = Modifier.padding(20.dp)) {
+            SettingsToggleRow(
+                title = stringResource(R.string.appearance_lighting),
+                description = stringResource(R.string.appearance_lighting_description),
+                checked = settings.isEdgeLightingEnabled,
+                onCheckedChange = onLightingToggle
+            )
 
             if (settings.isEdgeLightingEnabled) {
                 Spacer(modifier = Modifier.height(14.dp))
@@ -321,45 +289,48 @@ internal fun EdgeLightingSettingsCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ColorPaletteRow(
     selectedColor: Long,
     onSelectColor: (Long) -> Unit
 ) {
     val colors = listOf(
-        0xFF82D8D0, // Aqueous Aqua (Design Master)
-        0xFFA9A6EA, // Quiet Periwinkle (Design Master)
-        0xFF00E5FF, // Electric Cyan
-        0xFF00E676, // Neon Emerald
-        0xFFFF4081, // Vivid Pink
-        0xFFFFD600, // Amber Yellow
-        0xFFF0EEE9  // Cloud Dancer White
+        0xFF82D8D0 to R.string.design_color_aqua,
+        0xFFA9A6EA to R.string.design_color_periwinkle,
+        0xFF00E5FF to R.string.design_color_cyan,
+        0xFF00E676 to R.string.design_color_emerald,
+        0xFFFF4081 to R.string.design_color_pink,
+        0xFFFFD600 to R.string.design_color_yellow,
+        0xFFF0EEE9 to R.string.design_color_white
     )
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        colors.forEach { colorHex ->
+        colors.forEach { (colorHex, nameRes) ->
             val isSelected = selectedColor == colorHex
+            val name = stringResource(nameRes)
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color(colorHex))
-                    .clickable { onSelectColor(colorHex) }
-                    .border(
-                        width = if (isSelected) 3.dp else 1.dp,
-                        color = if (isSelected) Color.White else Color.Transparent,
-                        shape = CircleShape
-                    ),
+                    .semantics { contentDescription = name }
+                    .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onSelectColor(colorHex) }),
                 contentAlignment = Alignment.Center
             ) {
+                Box(Modifier.size(36.dp).background(Color(colorHex), CircleShape).border(
+                    width = if (isSelected) 3.dp else 1.dp,
+                    color = if (isSelected) CloudHighlight else Color.Transparent,
+                    shape = CircleShape
+                ))
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(R.string.appearance_selected),
-                        tint = if (colorHex == 0xFFFFFFFF) Color.Black else Color.White,
+                        contentDescription = null,
+                        tint = Graphite950,
                         modifier = Modifier.size(18.dp)
                     )
                 }

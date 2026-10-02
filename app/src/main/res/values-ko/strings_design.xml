@@ -2,12 +2,32 @@
 <resources>
     <string name="design_handle_preview">엣지 핸들 미리보기</string>
     <string name="design_handle_preview_description">%1$s 가장자리 · 현재 핸들 스타일</string>
-    <string name="design_handle_style">핸들 스타일</string>
+    <string name="design_handle_style">핸들과 패널</string>
     <string name="design_lighting">엣지 라이팅</string>
     <string name="design_font">글꼴</string>
     <string name="design_filters">알림 필터</string>
-    <string name="design_app_settings">앱 설정</string>
     <string name="design_side_left">왼쪽</string>
     <string name="design_side_right">오른쪽</string>
     <string name="design_open_panel">패널 열어보기</string>
+    <string name="design_notifications_group">알림</string>
+    <string name="design_appearance_group">화면 꾸미기</string>
+    <string name="design_behavior_group">동작 및 연동</string>
+    <string name="design_about_group">앱 정보</string>
+    <string name="design_handle_summary">%1$s · 핸들 %2$d × %3$d dp · 패널 %4$d dp</string>
+    <string name="design_lighting_on">사용 중 · 알림이 오면 화면 가장자리를 밝힙니다</string>
+    <string name="design_lighting_off">사용 안 함 · 알림 수신은 그대로 유지합니다</string>
+    <string name="design_behavior">패널 동작</string>
+    <string name="design_behavior_summary">영상 재생 제어와 터치 진동</string>
+    <string name="design_integrations">제스처 및 외부 앱</string>
+    <string name="design_integrations_summary">One Hand Operation+ 바로가기와 Tasker 연동</string>
+    <string name="design_diagnostics">고급 진단</string>
+    <string name="design_diagnostics_on">진단 모드 사용 중 · 12시간 뒤 자동 종료</string>
+    <string name="design_diagnostics_off">알림 표시 문제가 있을 때만 사용하세요</string>
+    <string name="design_color_aqua">아쿠아</string>
+    <string name="design_color_periwinkle">연보라</string>
+    <string name="design_color_cyan">시안</string>
+    <string name="design_color_emerald">에메랄드</string>
+    <string name="design_color_pink">분홍</string>
+    <string name="design_color_yellow">노랑</string>
+    <string name="design_color_white">오프화이트</string>
 </resources>

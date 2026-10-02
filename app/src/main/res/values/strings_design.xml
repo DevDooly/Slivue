@@ -2,12 +2,32 @@
 <resources>
     <string name="design_handle_preview">Edge handle preview</string>
     <string name="design_handle_preview_description">%1$s edge · your current handle style</string>
-    <string name="design_handle_style">Handle style</string>
+    <string name="design_handle_style">Handle &amp; panel</string>
     <string name="design_lighting">Edge lighting</string>
     <string name="design_font">Font</string>
     <string name="design_filters">Notification filters</string>
-    <string name="design_app_settings">App settings</string>
     <string name="design_side_left">Left</string>
     <string name="design_side_right">Right</string>
     <string name="design_open_panel">Open panel</string>
+    <string name="design_notifications_group">NOTIFICATIONS</string>
+    <string name="design_appearance_group">APPEARANCE</string>
+    <string name="design_behavior_group">BEHAVIOR &amp; INTEGRATIONS</string>
+    <string name="design_about_group">ABOUT</string>
+    <string name="design_handle_summary">%1$s edge · %2$d × %3$d dp handle · %4$d dp panel</string>
+    <string name="design_lighting_on">On · lights up when a notification arrives</string>
+    <string name="design_lighting_off">Off · notification reception is unchanged</string>
+    <string name="design_behavior">Panel behavior</string>
+    <string name="design_behavior_summary">Video playback and touch feedback</string>
+    <string name="design_integrations">Gestures &amp; external apps</string>
+    <string name="design_integrations_summary">One Hand Operation+ shortcuts and Tasker</string>
+    <string name="design_diagnostics">Advanced diagnostics</string>
+    <string name="design_diagnostics_on">Diagnostic mode on · automatically expires after 12 hours</string>
+    <string name="design_diagnostics_off">For troubleshooting notification display issues</string>
+    <string name="design_color_aqua">Aqua</string>
+    <string name="design_color_periwinkle">Periwinkle</string>
+    <string name="design_color_cyan">Cyan</string>
+    <string name="design_color_emerald">Emerald</string>
+    <string name="design_color_pink">Pink</string>
+    <string name="design_color_yellow">Yellow</string>
+    <string name="design_color_white">Off-white</string>
 </resources>

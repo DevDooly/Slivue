@@ -37,7 +37,6 @@
     <string name="settings_battery_permission_description">백그라운드에서 상시 안정적 실행 유지</string>
     <string name="settings_permission_granted">허용됨</string>
     <string name="settings_permission_grant">권한 허용</string>
-    <string name="settings_filter_title">알림 필터링 &amp; 제외 관리</string>
     <string name="settings_filter_description">알림 수신된 앱별 제외 및 특정 키워드 차단</string>
     <string name="settings_filter_summary">수신 앱 %1$d개 · 차단 키워드 %2$d개</string>
     <string name="settings_received_apps">수신 기록된 앱 (%1$d개)</string>
@@ -51,4 +50,5 @@
     <string name="settings_add">추가</string>
     <string name="settings_blocked_keywords_empty">등록된 차단 키워드가 없습니다.</string>
     <string name="settings_remove_keyword">차단 키워드 삭제: %1$s</string>
+    <string name="settings_keyword_label">차단할 단어</string>
 </resources>

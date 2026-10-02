@@ -4,17 +4,24 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import com.devdooly.notificationedge.util.userMessage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,7 +35,7 @@ internal fun FontSettingsCard(
     onFontSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
     var customFonts by remember { mutableStateOf(CustomFontManager.getCustomFonts(context)) }
 
     // 파일 선택 런처 (.ttf, .otf, .ttc)
@@ -62,17 +69,23 @@ internal fun FontSettingsCard(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            val stateLabel = stringResource(if (isExpanded) R.string.settings_collapse else R.string.settings_expand)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded },
+                    .clip(RoundedCornerShape(12.dp))
+                    .semantics { stateDescription = stateLabel }
+                    .clickable(role = Role.Button, onClickLabel = stateLabel) { isExpanded = !isExpanded }
+                    .heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Icon(Icons.Default.TextFields, contentDescription = null, tint = EdgeCyan, modifier = Modifier.size(22.dp))
+                Spacer(Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                     Text(
-                        text = stringResource(R.string.font_settings),
+                        text = stringResource(R.string.design_font),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
@@ -81,48 +94,46 @@ internal fun FontSettingsCard(
                     Text(
                         text = stringResource(R.string.font_current, currentDisplayName),
                         color = EdgeCyan,
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
-                IconButton(onClick = { isExpanded = !isExpanded }) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = stringResource(if (isExpanded) R.string.font_collapse else R.string.font_expand),
-                        tint = TextSecondary
-                    )
-                }
-            }
-
-            // 한영 혼용 정렬 보정 안내 문구
-            Spacer(modifier = Modifier.height(8.dp))
-            Surface(
-                color = DarkBackground,
-                shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, GlassBorder),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.TextFields,
-                        contentDescription = null,
-                        tint = EdgeCyan,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.font_alignment_description),
-                        color = TextMuted,
-                        fontSize = 11.sp,
-                        lineHeight = 15.sp
-                    )
-                }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = TextSecondary
+                )
             }
 
             if (isExpanded) {
+                // 한영 혼용 정렬 보정 안내 문구
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    color = DarkBackground,
+                    shape = RoundedCornerShape(8.dp),
+                    border = androidx.compose.foundation.BorderStroke(0.5.dp, GlassBorder),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.TextFields,
+                            contentDescription = null,
+                            tint = EdgeCyan,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.font_alignment_description),
+                            color = TextMuted,
+                            fontSize = 13.sp,
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // 폰트 파일 업로드 버튼
@@ -163,10 +174,12 @@ internal fun FontSettingsCard(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(modifier = Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         customFonts.forEach { customFont ->
                             val isSelected = customFont.id == selectedFontId
-                            val customFamily = CustomFontManager.loadFontFamily(context, customFont.id) ?: androidx.compose.ui.text.font.FontFamily.Default
+                            // 관리자의 수정 시각 기반 캐시를 사용해 같은 이름으로 다시 가져온 폰트도 반영한다.
+                            val customFamily = CustomFontManager.loadFontFamily(context, customFont.id)
+                                ?: androidx.compose.ui.text.font.FontFamily.Default
 
                             Surface(
                                 shape = RoundedCornerShape(10.dp),
@@ -177,7 +190,7 @@ internal fun FontSettingsCard(
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { onFontSelected(customFont.id) }
+                                    .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onFontSelected(customFont.id) })
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -228,7 +241,7 @@ internal fun FontSettingsCard(
                                         }
                                         RadioButton(
                                             selected = isSelected,
-                                            onClick = { onFontSelected(customFont.id) },
+                                            onClick = null,
                                             colors = RadioButtonDefaults.colors(
                                                 selectedColor = EdgeCyan,
                                                 unselectedColor = TextMuted
@@ -251,7 +264,7 @@ internal fun FontSettingsCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(modifier = Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AppFont.entries.forEach { fontOption ->
                         val isSelected = fontOption.id == selectedFontId
                         Surface(
@@ -263,7 +276,7 @@ internal fun FontSettingsCard(
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onFontSelected(fontOption.id) }
+                                .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onFontSelected(fontOption.id) })
                         ) {
                             Row(
                                 modifier = Modifier
@@ -296,7 +309,7 @@ internal fun FontSettingsCard(
                                 }
                                 RadioButton(
                                     selected = isSelected,
-                                    onClick = { onFontSelected(fontOption.id) },
+                                    onClick = null,
                                     colors = RadioButtonDefaults.colors(
                                         selectedColor = EdgeCyan,
                                         unselectedColor = TextMuted

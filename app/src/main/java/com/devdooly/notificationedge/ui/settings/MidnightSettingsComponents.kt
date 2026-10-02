@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +46,7 @@ internal fun SlivueSettingsBrand() {
             modifier = Modifier.size(52.dp).clip(RoundedCornerShape(16.dp)).background(Graphite900)
         )
         Spacer(Modifier.width(12.dp))
-        Column {
+        Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.app_name), color = TextPrimary, fontSize = 27.sp, fontWeight = FontWeight.Bold)
             Text("v${BuildConfig.VERSION_NAME}", color = TextSecondary, fontSize = 12.sp)
         }
@@ -56,6 +58,7 @@ internal fun SlivueSettingsBrand() {
 internal fun SettingsSection(
     title: String,
     icon: ImageVector,
+    summary: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -71,12 +74,55 @@ internal fun SettingsSection(
             ) {
                 Icon(icon, contentDescription = null, tint = EdgeCyan, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.width(14.dp))
-                Text(title, modifier = Modifier.weight(1f), color = TextPrimary, fontWeight = FontWeight.SemiBold)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(title, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                    if (summary != null) {
+                        Text(summary, color = TextSecondary, fontSize = 13.sp, lineHeight = 18.sp)
+                    }
+                }
                 Spacer(Modifier.width(8.dp))
                 Icon(if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null, tint = TextSecondary)
             }
         }
         if (expanded) content()
+    }
+}
+
+@Composable
+internal fun SettingsGroupHeading(title: String) {
+    Text(
+        title,
+        modifier = Modifier.semantics { heading() }.padding(start = 4.dp, top = 16.dp, bottom = 2.dp),
+        color = EdgeCyan,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.SemiBold
+    )
+}
+
+/** 스위치뿐 아니라 설명을 포함한 행 전체를 하나의 접근성 조작 대상으로 제공한다. */
+@Composable
+internal fun SettingsToggleRow(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .heightIn(min = 64.dp).padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Text(description, color = TextSecondary, fontSize = 13.sp, lineHeight = 20.sp)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(checkedThumbColor = CloudHighlight, checkedTrackColor = ActionBlue)
+        )
     }
 }
 

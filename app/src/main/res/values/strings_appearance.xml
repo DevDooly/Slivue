@@ -21,17 +21,13 @@
     <string name="appearance_square_corners">0 dp: square display corners (such as some Galaxy Ultra models)</string>
     <string name="appearance_adjust_corners">Adjust to match the corners of your screen.</string>
     <string name="appearance_test_lighting">Test lighting &amp; notifications</string>
-    <string name="appearance_selected">Selected</string>
     <string name="behavior_pause_youtube">Pause video before opening the panel</string>
     <string name="behavior_pause_youtube_description">Pause PiP-capable video apps first to reduce floating playback. Notification access is required. PiP may still occur depending on the app and launch method. Music-only apps are excluded.</string>
     <string name="behavior_haptic_feedback">Haptic feedback</string>
     <string name="behavior_haptic_feedback_description">Vibrate when touching the handle and receiving notifications</string>
     <string name="font_added">Font added: %1$s</string>
     <string name="font_import_failed">Could not import font: %1$s</string>
-    <string name="font_settings">Fonts</string>
     <string name="font_current">Current: %1$s</string>
-    <string name="font_collapse">Collapse</string>
-    <string name="font_expand">Show more</string>
     <string name="font_alignment_description">Baselines and padding are adjusted to keep mixed Korean and English text evenly aligned.</string>
     <string name="font_import">Import a font file (.ttf, .otf)</string>
     <string name="font_custom_fonts">Custom fonts (%1$d)</string>

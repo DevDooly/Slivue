@@ -8,28 +8,22 @@ import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.devdooly.notificationedge.BuildConfig
 import com.devdooly.notificationedge.R
 import com.devdooly.notificationedge.ui.theme.DarkBackground
-import com.devdooly.notificationedge.ui.theme.EdgeCyan
+import com.devdooly.notificationedge.data.model.EdgeSide
 import com.devdooly.notificationedge.util.AppLog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     val context = LocalContext.current
@@ -56,15 +50,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
+            // 고정 높이의 툴바 대신 내용 높이를 사용해 큰 시스템 글씨에서도 브랜드가 잘리지 않는다.
+            Surface(color = DarkBackground) {
+                Box(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)) {
                     SlivueSettingsBrand()
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkBackground,
-                    titleContentColor = com.devdooly.notificationedge.ui.theme.TextPrimary
-                )
-            )
+                }
+            }
         },
         containerColor = DarkBackground
     ) { paddingValues ->
@@ -72,7 +64,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item(key = "master-switch") {
@@ -111,6 +103,27 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 )
             }
 
+            item(key = "notifications-heading") {
+                SettingsGroupHeading(stringResource(R.string.design_notifications_group))
+            }
+
+            // 카드 자체의 펼침만 사용한다. 필터 조작까지 추가 메뉴를 거치지 않는다.
+            item(key = "notification-filter") {
+                NotificationFilterSettingsCard(
+                    discoveredPackages = settings.discoveredAppPackages,
+                    excludedPackages = settings.excludedPackages,
+                    blockedKeywords = settings.blockedKeywords,
+                    onToggleExcludedPackage = viewModel::setPackageExcluded,
+                    onClearDiscoveredPackages = viewModel::clearDiscoveredPackages,
+                    onAddBlockedKeyword = viewModel::addBlockedKeyword,
+                    onRemoveBlockedKeyword = viewModel::removeBlockedKeyword
+                )
+            }
+
+            item(key = "appearance-heading") {
+                SettingsGroupHeading(stringResource(R.string.design_appearance_group))
+            }
+
             item(key = "handle-preview") {
                 HandlePreviewCard(settings) {
                     context.startActivity(Intent(context, com.devdooly.notificationedge.ui.OpenPanelActivity::class.java))
@@ -118,7 +131,15 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             }
 
             item(key = "edge-handle") {
-                SettingsSection(stringResource(R.string.design_handle_style), Icons.Default.Tune) {
+                SettingsSection(
+                    stringResource(R.string.design_handle_style),
+                    Icons.Default.Tune,
+                    summary = stringResource(
+                        R.string.design_handle_summary,
+                        stringResource(if (settings.edgeSide == EdgeSide.LEFT) R.string.design_side_left else R.string.design_side_right),
+                        settings.handleWidthDp, settings.handleHeightDp, settings.panelWidthDp
+                    )
+                ) {
                     EdgeHandleSettingsCard(
                         settings = settings,
                         onSideChange = viewModel::updateEdgeSide,
@@ -135,7 +156,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             }
 
             item(key = "edge-lighting") {
-                SettingsSection(stringResource(R.string.design_lighting), Icons.Default.Lightbulb) {
+                SettingsSection(
+                    stringResource(R.string.design_lighting),
+                    Icons.Default.Lightbulb,
+                    summary = stringResource(if (settings.isEdgeLightingEnabled) R.string.design_lighting_on else R.string.design_lighting_off)
+                ) {
                     EdgeLightingSettingsCard(
                         settings = settings,
                         onLightingToggle = viewModel::updateEdgeLightingEnabled,
@@ -147,30 +172,34 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             }
 
             item(key = "font") {
-                SettingsSection(stringResource(R.string.design_font), Icons.Default.TextFields) {
-                    FontSettingsCard(
-                        selectedFontId = settings.selectedFont,
-                        onFontSelected = viewModel::updateSelectedFont
+                FontSettingsCard(
+                    selectedFontId = settings.selectedFont,
+                    onFontSelected = viewModel::updateSelectedFont
+                )
+            }
+
+            item(key = "behavior-heading") {
+                SettingsGroupHeading(stringResource(R.string.design_behavior_group))
+            }
+
+            item(key = "panel-behavior") {
+                SettingsSection(
+                    stringResource(R.string.design_behavior), Icons.Default.TouchApp,
+                    summary = stringResource(R.string.design_behavior_summary)
+                ) {
+                    BehaviorSettingsCard(
+                        settings = settings,
+                        onPauseMediaOnOpenChange = viewModel::updatePauseMediaOnOpen,
+                        onHapticFeedbackChange = viewModel::updateHapticEnabled
                     )
                 }
             }
 
-            item(key = "notification-filter") {
-                SettingsSection(stringResource(R.string.design_filters), Icons.Default.FilterList) {
-                    NotificationFilterSettingsCard(
-                        discoveredPackages = settings.discoveredAppPackages,
-                        excludedPackages = settings.excludedPackages,
-                        blockedKeywords = settings.blockedKeywords,
-                        onToggleExcludedPackage = viewModel::setPackageExcluded,
-                        onClearDiscoveredPackages = viewModel::clearDiscoveredPackages,
-                        onAddBlockedKeyword = viewModel::addBlockedKeyword,
-                        onRemoveBlockedKeyword = viewModel::removeBlockedKeyword
-                    )
-                }
-            }
-
-            item(key = "app-settings") {
-                SettingsSection(stringResource(R.string.design_app_settings), Icons.Default.Settings) {
+            item(key = "integrations") {
+                SettingsSection(
+                    stringResource(R.string.design_integrations), Icons.Default.Link,
+                    summary = stringResource(R.string.design_integrations_summary)
+                ) {
                     GoodLockIntegrationCard(
                         launchDirectToPanel = settings.launchDirectToPanel,
                         onToggleLaunchDirect = viewModel::updateLaunchDirectToPanel,
@@ -183,16 +212,22 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                             context.startActivity(intent)
                         }
                     )
-                    BehaviorSettingsCard(
-                        settings = settings,
-                        onPauseMediaOnOpenChange = viewModel::updatePauseMediaOnOpen,
-                        onHapticFeedbackChange = viewModel::updateHapticEnabled
-                    )
+                }
+            }
+
+            item(key = "about-heading") {
+                SettingsGroupHeading(stringResource(R.string.design_about_group))
+            }
+
+            item(key = "diagnostics") {
+                SettingsSection(
+                    stringResource(R.string.design_diagnostics), Icons.Default.BugReport,
+                    summary = stringResource(if (settings.diagnosticModeEnabled) R.string.design_diagnostics_on else R.string.design_diagnostics_off)
+                ) {
                     NotificationDebugDumpCard(
                         enabled = settings.diagnosticModeEnabled,
                         onEnabledChange = viewModel::updateDiagnosticModeEnabled
                     )
-                    AppInfoCard()
                 }
             }
 
@@ -200,6 +235,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             item(key = "app-update") {
                 AppUpdateCard(currentVersionName = BuildConfig.VERSION_NAME)
             }
+            item(key = "app-info") { AppInfoCard() }
         }
     }
 }

@@ -21,17 +21,13 @@
     <string name="appearance_square_corners">0 dp: 직각 디스플레이 (Galaxy Ultra 등)</string>
     <string name="appearance_adjust_corners">스마트폰 모서리 곡률에 맞춰 조절하세요</string>
     <string name="appearance_test_lighting">엣지 라이팅 &amp; 알림 동작 테스트</string>
-    <string name="appearance_selected">선택됨</string>
     <string name="behavior_pause_youtube">패널 열기 전 영상 일시 정지</string>
     <string name="behavior_pause_youtube_description">PiP 지원 영상 앱을 먼저 일시 정지해 작은 창 전환을 줄입니다. 알림 접근 권한이 필요하며 앱·실행 경로에 따라 PiP가 발생할 수 있습니다. 음악 전용 앱은 제외합니다.</string>
     <string name="behavior_haptic_feedback">햅틱 진동 피드백</string>
     <string name="behavior_haptic_feedback_description">핸들 터치 및 알림 시 진동</string>
     <string name="font_added">폰트가 추가되었습니다: %1$s</string>
     <string name="font_import_failed">폰트 등록 실패: %1$s</string>
-    <string name="font_settings">글꼴 및 폰트 설정 (Font)</string>
     <string name="font_current">현재: %1$s</string>
-    <string name="font_collapse">접기</string>
-    <string name="font_expand">더보기</string>
     <string name="font_alignment_description">한글/영문 혼용 시 수직 기준선(Baseline)과 패딩을 보정하여 고르게 표시합니다.</string>
     <string name="font_import">내 기기에서 폰트 파일(.ttf, .otf) 불러오기</string>
     <string name="font_custom_fonts">내가 추가한 커스텀 폰트 (%1$d)</string>

@@ -140,10 +140,10 @@ class LocalizationUiTest {
         var addedKeyword: String? = null
         showCard { EmptyFilterCard(onAddKeyword = { addedKeyword = it }) }
 
-        composeRule.onNodeWithText("Notification filters & exclusions").assertIsDisplayed()
+        composeRule.onNodeWithText("Notification filters").assertIsDisplayed()
         composeRule.onNodeWithText("Apps: 0 · Blocked keywords: 0").assertIsDisplayed()
         composeRule.onNodeWithText("Blocked keywords (0)").assertDoesNotExist()
-        composeRule.onNodeWithText("Notification filters & exclusions").performClick()
+        composeRule.onNodeWithText("Notification filters").performClick()
         composeRule.onNodeWithText("Blocked keywords (0)").assertIsDisplayed()
         composeRule.onNodeWithText("No blocked keywords added.").assertIsDisplayed()
         composeRule.onNode(hasSetTextAction()).performTextInput("spam")
@@ -156,9 +156,9 @@ class LocalizationUiTest {
     fun koreanFilterCard_expandsAndPreservesKoreanLabels() {
         showCard { EmptyFilterCard() }
 
-        composeRule.onNodeWithText("알림 필터링 & 제외 관리").assertIsDisplayed()
+        composeRule.onNodeWithText("알림 필터").assertIsDisplayed()
         composeRule.onNodeWithText("수신 앱 0개 · 차단 키워드 0개").assertIsDisplayed()
-        composeRule.onNodeWithText("알림 필터링 & 제외 관리").performClick()
+        composeRule.onNodeWithText("알림 필터").performClick()
         composeRule.onNodeWithText("차단 키워드 (0개)").assertIsDisplayed()
         composeRule.onNodeWithText("등록된 차단 키워드가 없습니다.").assertIsDisplayed()
         composeRule.onNodeWithText("추가").assertIsDisplayed()
