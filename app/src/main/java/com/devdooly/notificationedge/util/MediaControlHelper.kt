@@ -102,6 +102,8 @@ object MediaControlHelper {
 
     private val MUSIC_PACKAGES = setOf(
         "com.google.android.apps.youtube.music", "com.spotify.music", "com.sec.android.app.music",
-        "com.apple.android.music", "com.amazon.mp3"
+        "com.apple.android.music", "com.amazon.mp3",
+        // 음악 앱에 뮤직비디오/PiP 화면이 있어도 음악 재생을 중단하지 않는다.
+        "com.iloen.melon", "com.ktmusic.geniemusic"
     )
 }

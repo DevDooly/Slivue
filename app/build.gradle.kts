@@ -58,8 +58,8 @@ android {
         applicationId = "com.devdooly.notificationedge"
         minSdk = 26
         targetSdk = 34
-        versionCode = 154
-        versionName = "1.3.24"
+        versionCode = 155
+        versionName = "1.3.25"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

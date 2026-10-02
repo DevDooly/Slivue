@@ -1,9 +1,16 @@
 package com.devdooly.notificationedge.util
 
 import android.content.Context
+import android.content.pm.PackageManager
+import android.content.res.AssetManager
+import android.content.res.Resources
+import android.content.res.XmlResourceParser
 import android.media.session.PlaybackState
 import android.util.Xml
 import androidx.test.core.app.ApplicationProvider
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.xmlpull.v1.XmlPullParser
 import java.io.StringReader
 
 @RunWith(RobolectricTestRunner::class)
@@ -86,5 +94,61 @@ class MediaControlHelperTest {
         assertFalse(MediaControlHelper.isVideoApp(context, "example.fake.revanced.android.youtube"))
         assertFalse(MediaControlHelper.isVideoApp(context, "com.google.android.apps.youtube.music"))
         assertFalse(MediaControlHelper.isVideoApp(context, "example.missing"))
+    }
+
+    @Test fun melonIsExcludedEvenWhenItsManifestSupportsPip() {
+        assertMusicIsExcludedBeforeReadingManifest("com.iloen.melon")
+    }
+
+    @Test fun genieIsExcludedEvenWhenItsManifestSupportsPip() {
+        assertMusicIsExcludedBeforeReadingManifest("com.ktmusic.geniemusic")
+    }
+
+    @Test fun existingMusicExclusionsStillTakePrecedenceOverPipSupport() {
+        val environment = PipCapableEnvironment()
+        val musicPackages = listOf(
+            "com.google.android.apps.youtube.music", "com.spotify.music",
+            "com.sec.android.app.music", "com.apple.android.music", "com.amazon.mp3"
+        )
+        musicPackages.forEach { packageName ->
+            assertFalse(packageName, MediaControlHelper.isVideoApp(environment.context, packageName))
+        }
+        verify(exactly = 0) { environment.packageManager.getResourcesForApplication(any<String>()) }
+    }
+
+    @Test fun nonMusicPipAppsRemainVideoTargets() {
+        val environment = PipCapableEnvironment()
+        assertTrue(MediaControlHelper.isVideoApp(environment.context, "com.google.android.youtube"))
+        verify(exactly = 1) { environment.packageManager.getResourcesForApplication("com.google.android.youtube") }
+    }
+
+    private fun assertMusicIsExcludedBeforeReadingManifest(packageName: String) {
+        val environment = PipCapableEnvironment()
+        assertFalse(packageName, MediaControlHelper.isVideoApp(environment.context, packageName))
+        verify(exactly = 0) { environment.packageManager.getResourcesForApplication(any<String>()) }
+        // 설치되지 않은 앱이라서 우연히 제외되는 검사가 되지 않도록 PiP 판별도 확인한다.
+        assertTrue(MediaControlHelper.isVideoApp(environment.context, "com.google.android.youtube"))
+    }
+
+    /** 모든 앱이 PiP를 선언한 상황에서도 음악 앱 제외 규칙이 우선하는지 검증한다. */
+    private class PipCapableEnvironment {
+        val context = mockk<Context>()
+        val packageManager = mockk<PackageManager>()
+
+        init {
+            val resources = mockk<Resources>()
+            val assets = mockk<AssetManager>()
+            val parser = mockk<XmlResourceParser>()
+            every { context.packageName } returns "com.devdooly.notificationedge"
+            every { context.packageManager } returns packageManager
+            every { packageManager.getResourcesForApplication(any<String>()) } returns resources
+            every { resources.assets } returns assets
+            every { assets.openXmlResourceParser("AndroidManifest.xml") } returns parser
+            every { parser.eventType } returns XmlPullParser.START_TAG
+            every { parser.name } returns "activity"
+            every { parser.getAttributeResourceValue(any<String>(), "supportsPictureInPicture", 0) } returns 0
+            every { parser.getAttributeBooleanValue(any<String>(), "supportsPictureInPicture", false) } returns true
+            every { parser.close() } returns Unit
+        }
     }
 }
