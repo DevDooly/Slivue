@@ -1,0 +1,39 @@
+name: 스토어 소개 검증
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - 'README.en.md'
+      - 'docs/GOOGLE_PLAY_LISTING_GUIDE.md'
+      - 'docs/google-play/**'
+      - 'scripts/build-store-preview.mjs'
+      - 'scripts/tests/build-store-preview.test.mjs'
+      - '.github/workflows/store-listing.yml'
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'README.en.md'
+      - 'docs/GOOGLE_PLAY_LISTING_GUIDE.md'
+      - 'docs/google-play/**'
+      - 'scripts/build-store-preview.mjs'
+      - 'scripts/tests/build-store-preview.test.mjs'
+      - '.github/workflows/store-listing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: 한·영 소개 길이 및 미리보기 일치 검사
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 소스 가져오기
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Node.js 버전 확인
+        run: node --version
+      - name: 글자 수·언어 자료·HTML 생성 회귀 검사
+        run: node --test scripts/tests/build-store-preview.test.mjs

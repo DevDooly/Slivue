@@ -1,0 +1,44 @@
+Stay on your screen. Keep notifications within reach.
+
+Slivue is an Android notification panel that opens from the edge of your screen. Check recent notifications and reply to supported messages while using another app.
+
+A notification panel at your fingertips
+• Open the panel using a handle on the left or right edge.
+• View recent notifications and messages grouped by conversation.
+• Close the panel with the Back button or your system's back gesture.
+
+Quick replies to supported notifications
+• Reply directly from the panel when a notification supports Android's inline reply feature.
+• See your sent replies in the same conversation card.
+• Reply availability depends on the original app and the actions offered by each notification.
+
+Choose what appears
+• Exclude notifications from selected apps.
+• Filter notifications using blocked keywords.
+• Manage keywords and excluded apps together in one expandable filter card.
+
+Make it yours
+• Adjust the handle's position, size, color and transparency.
+• Choose the panel width and font, or import your own font file.
+• Enable edge lighting and choose its color.
+
+Shortcuts and gesture integration
+• Open the panel through a compatible launcher shortcut.
+• On supported Samsung Galaxy devices, connect the home screen shortcut to One Hand Operation + in Good Lock. These apps must be installed separately.
+• Slivue is independent and is not an official Samsung app or an affiliated product.
+
+Available in Korean and English
+• The interface follows your device language by default.
+• On Android 13 and later, choose Korean or English in the system's app language settings.
+• This does not automatically translate received messages.
+
+Permissions and data handling
+• Notification access lets Slivue read notification content and reply actions to display and filter notifications.
+• Display over other apps lets the edge handle and lighting appear while you use other apps.
+• Notifications are used to show the running service status on supported Android versions.
+• Notification display and filtering are processed on your device. Quick replies are passed to the original messaging app, which handles their delivery.
+• Settings may be backed up and restored according to your Android backup settings. Some optional fonts are downloaded through their provider.
+• Use Slivue without creating an account. No advertising SDKs are included.
+
+Before you start
+Requires Android 8.0 or later. Behavior may vary by device, Android version, the notifications provided by other apps and battery settings. Slivue does not recover sensitive notification content hidden by the operating system or the original app, or bypass their protections.

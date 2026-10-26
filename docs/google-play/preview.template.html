@@ -1,0 +1,133 @@
+<!doctype html>
+<!-- 생성 원본: preview.template.html + listings/. index.html은 직접 편집하지 마세요. -->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Slivue 한국어·영어 Google Play 소개 미리보기 / Korean and English store listing preview.">
+  <meta name="color-scheme" content="light">
+  <title>Slivue · 스토어 소개 / Store listing</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #152842; background: #f4f6fa; line-height: 1.7; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; }
+    a { color: #1e56bf; text-underline-offset: 4px; }
+    a:hover { text-decoration-thickness: 2px; }
+    a:focus-visible, button:focus-visible { outline: 3px solid #6748dd; outline-offset: 4px; }
+    .skip-link { position: absolute; left: 16px; top: -100px; background: white; padding: 12px; z-index: 2; }
+    .skip-link:focus { top: 12px; }
+    .page-header { position: sticky; top: 0; z-index: 1; background: #f4f6faf5; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 1008px; margin: auto; padding: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 750; font-size: 23px; color: #0a1730; text-decoration: none; }
+    .brand img { border-radius: 12px; }
+    .language-nav { display: flex; gap: 4px; padding: 4px; border: 1px solid #d5deeb; border-radius: 14px; background: white; }
+    .language-nav a { padding: 8px 16px; min-height: 44px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 650; }
+    .language-nav a[aria-current="true"] { color: white; background: #173b6b; }
+    main { max-width: 1008px; margin: 0 auto; padding: 0 24px 40px; }
+    section { scroll-margin-top: 140px; }
+    .hero { display: flex; align-items: center; gap: 32px; padding: 40px; border-radius: 24px; background: #0b1830; color: white; border-right: 5px solid #4382ff; }
+    .hero img { border-radius: 25px; flex: none; box-shadow: 0 12px 32px #0003; }
+    .eyebrow { margin: 0 0 8px; color: #a8caff; font-weight: 600; font-size: 13px; letter-spacing: .04em; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 38px); line-height: 1.3; letter-spacing: -.035em; text-wrap: balance; }
+    .tagline { margin: 14px 0 0; color: #d3dff0; font-size: 17px; }
+    .requirements { margin: 20px 0 0; color: #afc0d8; font-size: 13px; }
+    .notice { font-size: 14px; color: #52647c; margin: 20px 4px 28px; }
+    .field-card { background: white; border: 1px solid #dce3ef; border-radius: 18px; padding: 24px; margin: 16px 0; box-shadow: 0 3px 12px #0b183003; }
+    .field-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    h2 { font-size: 16px; margin: 0; }
+    .field-actions { display: flex; align-items: center; gap: 12px; }
+    .count { font-size: 12px; color: #617188; font-variant-numeric: tabular-nums; }
+    button { color: #1d4e94; background: #eef4ff; border: 1px solid #d5e3fa; border-radius: 10px; padding: 8px 16px; min-height: 44px; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+    button:hover { background: #dceaff; }
+    .field-text { font: inherit; font-size: 17px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 16px 0; color: #172d49; }
+    .full-text { font-size: 15px; line-height: 1.85; }
+    .source-link { font-size: 12px; display: inline-flex; align-items: center; min-height: 44px; }
+    .footer-note { font-size: 13px; color: #617188; padding: 16px 4px; }
+    .page-footer { max-width: 1008px; margin: auto; padding: 0 24px 40px; font-size: 13px; display: flex; gap: 20px; flex-wrap: wrap; }
+    .status { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: calc(100% - 32px); width: max-content; border-radius: 12px; background: #173b6b; color: white; padding: 12px 20px; box-shadow: 0 4px 24px #0002; font-size: 14px; z-index: 2; }
+    .status:empty { display: none; }
+    @media (max-width: 600px) {
+      .page-header { padding: 20px 16px; }
+      .language-nav a { padding-inline: 12px; }
+      main { padding: 0 16px 24px; }
+      .hero { align-items: flex-start; flex-direction: column; gap: 24px; padding: 28px 24px; }
+      .hero img { width: 80px; height: 80px; border-radius: 18px; }
+      .field-card { padding: 20px; }
+      .field-header { gap: 8px; }
+      .notice { margin-bottom: 24px; }
+    }
+    @media print {
+      .language-nav, button, .source-link, .page-footer, .status { display: none; }
+      .hero { print-color-adjust: exact; }
+      .field-card { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">본문으로 / Skip to content</a>
+  <header class="page-header">
+    <a class="brand" href="https://github.com/DevDooly/message_edge"><img src="../icons/play_store/notification_edge_sliding_panel_512.png" alt="" width="40" height="40">Slivue</a>
+    <nav class="language-nav" aria-label="언어 / Language">
+      <a href="#ko-KR" lang="ko" hreflang="ko">한국어</a>
+      <a href="#en-US" lang="en" hreflang="en">English</a>
+    </nav>
+  </header>
+  <main id="content">
+<!-- LISTINGS -->
+  </main>
+  <footer class="page-footer"><a href="../../README.md" lang="ko">한국어 README</a><a href="../../README.en.md" lang="en">English README</a><a href="https://github.com/DevDooly/message_edge/issues">GitHub Issues</a></footer>
+  <p class="status" role="status" aria-live="polite" aria-atomic="true"></p>
+  <script>
+    (() => {
+      const sections = [...document.querySelectorAll('[data-locale]')];
+      const links = [...document.querySelectorAll('.language-nav a')];
+      const status = document.querySelector('.status');
+      let statusTimer;
+      function setLanguage() {
+        const requested = location.hash.slice(1);
+        const preferred = (navigator.language || 'en').toLowerCase().startsWith('ko') ? 'ko-KR' : 'en-US';
+        const selected = sections.find(section => section.id === requested) || sections.find(section => !section.hidden && section.dataset.active === 'true') || sections.find(section => section.id === preferred);
+        sections.forEach(section => {
+          section.hidden = section !== selected;
+          section.dataset.active = String(section === selected);
+        });
+        links.forEach(link => {
+          if (link.hash === '#' + selected.id) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        });
+        document.documentElement.lang = selected.lang;
+        document.title = 'Slivue · ' + selected.querySelector('.eyebrow').textContent;
+        clearTimeout(statusTimer);
+        status.textContent = '';
+      }
+      function announce(text) {
+        clearTimeout(statusTimer);
+        status.textContent = text;
+        statusTimer = setTimeout(() => { status.textContent = ''; }, 6500);
+      }
+      document.querySelectorAll('[data-copy]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const target = document.getElementById(button.dataset.copy);
+          const section = button.closest('[data-locale]');
+          try {
+            if (!navigator.clipboard || !window.isSecureContext) throw new Error('Clipboard unavailable');
+            await navigator.clipboard.writeText(target.textContent);
+            announce(section.dataset.copied);
+          } catch {
+            const selection = window.getSelection();
+            if (selection) {
+              const range = document.createRange();
+              range.selectNodeContents(target);
+              selection.removeAllRanges();
+              selection.addRange(range);
+              announce(section.dataset.fallback);
+            } else announce(section.dataset.failed);
+          }
+        });
+      });
+      addEventListener('hashchange', setLanguage);
+      setLanguage();
+    })();
+  </script>
+</body>
+</html>
