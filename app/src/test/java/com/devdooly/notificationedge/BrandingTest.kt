@@ -16,10 +16,10 @@ class BrandingTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
-    fun `Slivue branding preserves the existing Android application identity`() {
+    fun `Slivue branding uses the selected distribution identity`() {
         assertEquals("Slivue", context.getString(R.string.app_name))
         assertEquals("Slivue", context.applicationInfo.loadLabel(context.packageManager).toString())
-        assertEquals("com.devdooly.notificationedge", context.packageName)
+        assertEquals(if (BuildConfig.IS_PLAY_DISTRIBUTION) "com.devdooly.slivue" else "com.devdooly.notificationedge", context.packageName)
         assertEquals("화면은 그대로, 알림은 바로.", context.getString(R.string.app_tagline))
     }
 

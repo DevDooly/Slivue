@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.devdooly.notificationedge.BuildConfig
 import com.devdooly.notificationedge.data.model.AppSettings
 import com.devdooly.notificationedge.data.model.EdgeNotification
 import com.devdooly.notificationedge.data.model.NotificationActionItem
@@ -16,6 +17,7 @@ import com.devdooly.notificationedge.data.repository.NotificationRepository
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.util.AppLog
 import com.devdooly.notificationedge.util.RemoteViewsTextExtractor
+import com.devdooly.notificationedge.util.PrivacyConsent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,92 +36,160 @@ class NotificationListener : NotificationListenerService() {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     private lateinit var settingsRepo: SettingsRepository
+    private lateinit var privacyConsent: PrivacyConsent
+    @Volatile
+    private var listenerConnected = false
+    private val settingsReady = MutableStateFlow(false)
     private val currentSettingsState = MutableStateFlow(AppSettings())
     private val currentSettings: AppSettings
         get() = currentSettingsState.value
 
+    private val cancelOneCallback: (String) -> Unit = { key ->
+        privacyConsent.withCurrentAccess(privacyConsent.accessGeneration) {
+            runCatching { cancelNotification(key) }
+                .onFailure { AppLog.warning("NotificationListener", "개별 알림 해제 실패", it) }
+        }
+    }
+    private val cancelAllCallback: () -> Unit = {
+        privacyConsent.withCurrentAccess(privacyConsent.accessGeneration) {
+            runCatching { cancelAllNotifications() }
+                .onFailure { AppLog.warning("NotificationListener", "전체 알림 해제 실패", it) }
+        }
+    }
+
     private sealed interface NotificationEvent {
-        data class Posted(val notification: StatusBarNotification) : NotificationEvent
-        data class Removed(val key: String) : NotificationEvent
+        data class Posted(val notification: StatusBarNotification, val generation: Long) : NotificationEvent
+        data class Removed(val key: String, val generation: Long) : NotificationEvent
     }
 
     override fun onCreate() {
         super.onCreate()
         settingsRepo = SettingsRepository.getInstance(applicationContext)
+        privacyConsent = PrivacyConsent.getInstance(applicationContext)
         serviceScope.launch {
             settingsRepo.settingsFlow.collect {
                 currentSettingsState.value = it
+                settingsReady.value = true
             }
         }
         serviceScope.launch {
+            // 최초 수신에서도 저장된 제외 앱·차단어를 읽기 전에 기본값으로 처리하지 않는다.
+            settingsReady.first { it }
             for (event in notificationEvents) {
                 when (event) {
-                    is NotificationEvent.Posted -> parseAndAddNotification(event.notification)
-                    is NotificationEvent.Removed -> NotificationRepository.markAsDismissed(event.key)
+                    is NotificationEvent.Posted -> {
+                        if (isAccessCurrent(event.generation)) parseAndAddNotification(event.notification, event.generation)
+                    }
+                    is NotificationEvent.Removed -> {
+                        privacyConsent.withCurrentAccess(event.generation) {
+                            NotificationRepository.markAsDismissed(event.key)
+                        }
+                    }
                 }
+            }
+        }
+        serviceScope.launch {
+            privacyConsent.state.collect { state ->
+                if (state.isProcessingEnabled) refreshAuthorizedConnection(state.transitionGeneration)
+                else unbindIfInactive()
             }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        notificationEvents.close()
+        listenerConnected = false
+        notificationEvents.cancel()
         clearRepositoryCallbacks()
+        // 권한 철회로 바인딩이 파괴되는 경로에서는 disconnected 콜백이 생략될 수 있다.
+        if (::privacyConsent.isInitialized) {
+            privacyConsent.reconcileNotificationAccess()
+            privacyConsent.whenProcessingInactive { NotificationRepository.clearMemoryOnly() }
+        }
         serviceScope.cancel()
     }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        
-        NotificationRepository.cancelNotificationCallback = { key ->
-            try {
-                cancelNotification(key)
-            } catch (e: Exception) {
-                AppLog.warning("NotificationListener", "개별 알림 해제 실패", e)
-            }
+        listenerConnected = true
+        privacyConsent.reconcileNotificationAccess()
+        if (!privacyConsent.canProcessNotifications()) {
+            unbindIfInactive()
+            return
         }
-        
-        NotificationRepository.cancelAllNotificationsCallback = {
-            try {
-                cancelAllNotifications()
-            } catch (e: Exception) {
-                AppLog.warning("NotificationListener", "전체 알림 해제 실패", e)
-            }
-        }
+        refreshAuthorizedConnection(privacyConsent.accessGeneration)
+    }
 
-        // 연결 시점에 현재 쌓여있는 활성 알림들 로드
-        try {
-            activeNotifications?.forEach { sbn ->
-                notificationEvents.trySend(NotificationEvent.Posted(sbn))
+    private fun refreshAuthorizedConnection(generation: Long) {
+        if (!listenerConnected) return
+        privacyConsent.withCurrentAccess(generation) {
+            if (!listenerConnected) return@withCurrentAccess
+            NotificationRepository.cancelNotificationCallback = cancelOneCallback
+            NotificationRepository.cancelAllNotificationsCallback = cancelAllCallback
+            // 연결·재개 시에만 현재 활성 알림을 가져오며, 조회와 큐 삽입도 철회와 선형화한다.
+            try {
+                activeNotifications?.forEach { sbn ->
+                    notificationEvents.trySend(NotificationEvent.Posted(sbn, generation))
+                }
+            } catch (e: Exception) {
+                AppLog.warning("NotificationListener", "활성 알림 초기 로드 실패", e)
             }
-        } catch (e: Exception) {
-            AppLog.warning("NotificationListener", "활성 알림 초기 로드 실패", e)
+        }
+    }
+
+    private fun unbindIfInactive() {
+        // 이 모니터 뒤에 resume/requestRebind가 실행되므로 늦은 unbind가 재개를 덮지 않는다.
+        privacyConsent.whenProcessingInactive {
+            clearRepositoryCallbacks()
+            NotificationRepository.clearMemoryOnly()
+            while (notificationEvents.tryReceive().isSuccess) { /* 철회 전 대기 중인 원문 참조 폐기 */ }
+            if (listenerConnected) {
+                listenerConnected = false
+                runCatching { requestUnbind() }
+            }
         }
     }
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
+        listenerConnected = false
         clearRepositoryCallbacks()
+        privacyConsent.reconcileNotificationAccess()
+        privacyConsent.whenProcessingInactive { NotificationRepository.clearMemoryOnly() }
     }
 
     private fun clearRepositoryCallbacks() {
-        NotificationRepository.cancelNotificationCallback = null
-        NotificationRepository.cancelAllNotificationsCallback = null
+        if (NotificationRepository.cancelNotificationCallback === cancelOneCallback) {
+            NotificationRepository.cancelNotificationCallback = null
+        }
+        if (NotificationRepository.cancelAllNotificationsCallback === cancelAllCallback) {
+            NotificationRepository.cancelAllNotificationsCallback = null
+        }
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
-        if (sbn == null) return
-        notificationEvents.trySend(NotificationEvent.Posted(sbn))
+        if (sbn == null || !listenerConnected || !privacyConsent.canProcessNotifications()) return
+        val generation = privacyConsent.accessGeneration
+        privacyConsent.withCurrentAccess(generation) {
+            notificationEvents.trySend(NotificationEvent.Posted(sbn, generation))
+        }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
         super.onNotificationRemoved(sbn)
-        if (sbn == null) return
-        notificationEvents.trySend(NotificationEvent.Removed(sbn.key))
+        if (sbn == null || !listenerConnected || !privacyConsent.canProcessNotifications()) return
+        val generation = privacyConsent.accessGeneration
+        privacyConsent.withCurrentAccess(generation) {
+            notificationEvents.trySend(NotificationEvent.Removed(sbn.key, generation))
+        }
     }
 
-    private fun parseAndAddNotification(sbn: StatusBarNotification) {
+    private fun isAccessCurrent(generation: Long): Boolean =
+        generation == privacyConsent.accessGeneration && privacyConsent.canProcessNotifications()
+
+    private fun parseAndAddNotification(sbn: StatusBarNotification, generation: Long) {
+        if (!isAccessCurrent(generation)) return
         val packageName = sbn.packageName
         // 본인 앱의 포그라운드 서비스 알림 등은 제외
         if (packageName == applicationContext.packageName) return
@@ -127,7 +197,7 @@ class NotificationListener : NotificationListenerService() {
         // 0. 수신된 앱 목록(발견된 앱)에 자동 누적
         serviceScope.launch {
             try {
-                settingsRepo.addDiscoveredPackage(packageName)
+                if (isAccessCurrent(generation)) settingsRepo.addDiscoveredPackage(packageName, generation)
             } catch (e: Exception) {
                 AppLog.warning("NotificationListener", "발견 앱 저장 실패", e)
             }
@@ -263,7 +333,7 @@ class NotificationListener : NotificationListenerService() {
 
         val finalTitle = if (formattedTitle.isNotBlank()) formattedTitle else appName
 
-        val extrasDump = if (settingsRepo.isDiagnosticModeEnabledSync()) {
+        val extrasDump = if (!BuildConfig.IS_PLAY_DISTRIBUTION && settingsRepo.isDiagnosticModeEnabledSync()) {
             dumpExtras(
                 extras = extras,
                 sbn = sbn,
@@ -299,7 +369,9 @@ class NotificationListener : NotificationListenerService() {
             subTextLabel = parsed.groupRoomNameLabel
         )
 
-        NotificationRepository.addOrUpdateNotification(edgeNotification)
+        privacyConsent.withCurrentAccess(generation) {
+            NotificationRepository.addOrUpdateNotification(edgeNotification)
+        }
     }
 
     /**

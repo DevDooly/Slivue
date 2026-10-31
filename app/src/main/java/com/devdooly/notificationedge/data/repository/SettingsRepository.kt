@@ -12,8 +12,10 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.devdooly.notificationedge.BuildConfig
 import com.devdooly.notificationedge.data.model.AppSettings
 import com.devdooly.notificationedge.data.model.EdgeSide
+import com.devdooly.notificationedge.util.PrivacyConsent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -93,7 +95,7 @@ class SettingsRepository(private val context: Context) {
             val defaults = AppSettings()
             val nowEpochMs = System.currentTimeMillis()
             val diagnosticExpiresAt = prefs[PreferencesKeys.DIAGNOSTIC_MODE_EXPIRES_AT] ?: 0L
-            val diagnosticEnabled = isDiagnosticSessionActive(
+            val diagnosticEnabled = !BuildConfig.IS_PLAY_DISTRIBUTION && isDiagnosticSessionActive(
                 enabled = prefs[PreferencesKeys.DIAGNOSTIC_MODE_ENABLED] ?: defaults.diagnosticModeEnabled,
                 expiresAtEpochMs = diagnosticExpiresAt,
                 nowEpochMs = nowEpochMs
@@ -213,22 +215,23 @@ class SettingsRepository(private val context: Context) {
     }
 
     suspend fun updateDiagnosticModeEnabled(enabled: Boolean) {
-        val expiresAtEpochMs = if (enabled) {
+        val allowed = enabled && !BuildConfig.IS_PLAY_DISTRIBUTION
+        val expiresAtEpochMs = if (allowed) {
             System.currentTimeMillis() + DIAGNOSTIC_SESSION_DURATION_MS
         } else {
             0L
         }
         context.getSharedPreferences(SYNC_PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
-            putBoolean(KEY_DIAGNOSTIC_MODE, enabled)
-            if (enabled) {
+            putBoolean(KEY_DIAGNOSTIC_MODE, allowed)
+            if (allowed) {
                 putLong(KEY_DIAGNOSTIC_MODE_EXPIRES_AT, expiresAtEpochMs)
             } else {
                 remove(KEY_DIAGNOSTIC_MODE_EXPIRES_AT)
             }
         }.apply()
         context.dataStore.edit {
-            it[PreferencesKeys.DIAGNOSTIC_MODE_ENABLED] = enabled
-            if (enabled) {
+            it[PreferencesKeys.DIAGNOSTIC_MODE_ENABLED] = allowed
+            if (allowed) {
                 it[PreferencesKeys.DIAGNOSTIC_MODE_EXPIRES_AT] = expiresAtEpochMs
             } else {
                 it.remove(PreferencesKeys.DIAGNOSTIC_MODE_EXPIRES_AT)
@@ -237,6 +240,7 @@ class SettingsRepository(private val context: Context) {
     }
 
     fun isDiagnosticModeEnabledSync(): Boolean {
+        if (BuildConfig.IS_PLAY_DISTRIBUTION) return false
         val sp = context.getSharedPreferences(SYNC_PREFS_NAME, Context.MODE_PRIVATE)
         val enabled = sp.getBoolean(KEY_DIAGNOSTIC_MODE, false)
         val expiresAtEpochMs = sp.getLong(KEY_DIAGNOSTIC_MODE_EXPIRES_AT, 0L)
@@ -274,13 +278,18 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    suspend fun addDiscoveredPackage(packageName: String) {
+    suspend fun addDiscoveredPackage(packageName: String, accessGeneration: Long? = null) {
         if (packageName.isBlank()) return
         context.dataStore.edit { prefs ->
-            val current = prefs[PreferencesKeys.DISCOVERED_APP_PACKAGES] ?: emptySet()
-            if (!current.contains(packageName)) {
-                prefs[PreferencesKeys.DISCOVERED_APP_PACKAGES] = current + packageName
+            val update = {
+                val current = prefs[PreferencesKeys.DISCOVERED_APP_PACKAGES] ?: emptySet()
+                if (!current.contains(packageName)) {
+                    prefs[PreferencesKeys.DISCOVERED_APP_PACKAGES] = current + packageName
+                }
             }
+            // DataStore 대기는 모니터 밖, 실제 메타데이터 변경만 권한 세대와 함께 검사한다.
+            if (accessGeneration == null) update()
+            else PrivacyConsent.getInstance(context).withCurrentAccess(accessGeneration, update)
         }
     }
 

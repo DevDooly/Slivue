@@ -1,0 +1,66 @@
+name: Play 미서명 후보 검증
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'scripts/verify-play-artifact.mjs'
+      - 'scripts/tests/verify-play-artifact.test.mjs'
+      - '.github/workflows/play-candidate.yml'
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'scripts/verify-play-artifact.mjs'
+      - 'scripts/tests/verify-play-artifact.test.mjs'
+      - '.github/workflows/play-candidate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: play-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  candidate:
+    name: Play AAB 분리·권한·네이티브 정렬 검증
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 소스 가져오기
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: JDK 17 준비
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Gradle 캐시 준비
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+      - name: 미서명 Play 후보 테스트·린트·번들 생성
+        run: |
+          chmod +x gradlew
+          ./gradlew testPlayDebugUnitTest lintPlayRelease bundlePlayRelease --no-daemon
+      - name: Play 산출물 검증 도구 회귀 검사
+        run: node --test scripts/tests/verify-play-artifact.test.mjs
+      - name: 실제 AAB 패키지·권한·DEX·16KB ELF 검사
+        run: node scripts/verify-play-artifact.mjs app/build/outputs/bundle/playRelease/app-play-release.aab
+      - name: 미서명 검증 후보만 보관
+        run: |
+          mkdir -p play_candidate
+          cp app/build/outputs/bundle/playRelease/app-play-release.aab play_candidate/Slivue-play-unsigned-candidate.aab
+          printf '%s\n' '미서명 기술 검증 후보입니다. 업로드 키·확정된 공개 개인정보처리방침·Console 준비 조건을 충족하지 않아 Play 제출용이 아닙니다.' > play_candidate/제출불가-검증후보.txt
+      - name: 검증 후보 첨부
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: slivue-play-unsigned-candidate-${{ github.run_id }}
+          path: play_candidate/
+          if-no-files-found: error
+          retention-days: 7

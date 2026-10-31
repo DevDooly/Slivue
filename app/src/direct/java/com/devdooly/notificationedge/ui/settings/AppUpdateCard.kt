@@ -1,5 +1,7 @@
 package com.devdooly.notificationedge.ui.settings
 
+// GitHub APK 다운로드·설치 UI는 직접 배포판에서만 컴파일한다.
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

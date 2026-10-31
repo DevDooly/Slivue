@@ -28,7 +28,7 @@ Slivue is an open-source Android app that brings recent notifications into a pan
 
 On Samsung Galaxy devices, you can connect **Good Lock · One Hand Operation +** to open the panel with a gesture. Other Android devices can use Slivue's left or right edge handle.
 
-The app was renamed Slivue in v1.3.18 to distinguish it from another developer's similarly named app; it is not that app's official successor or an affiliated product. The Android package identifier remains `com.devdooly.notificationedge` for installation and settings compatibility. Existing users can update without uninstalling.
+The app was renamed Slivue in v1.3.18 to distinguish it from another developer's similarly named app; it is not that app's official successor or an affiliated product. The GitHub distribution retains `com.devdooly.notificationedge` for installation and settings compatibility. The separate Play build uses `com.devdooly.slivue`; it installs as a new app and does not automatically import the GitHub app’s settings or permissions.
 
 ## Midnight Rail design
 
@@ -116,6 +116,8 @@ See the [Samsung Good Lock integration guide (Korean)](docs/Samsung_Edge_Integra
 
 ## Privacy and security
 
+The following implementation notes describe the **GitHub direct distribution**. The separate Play build excludes the Internet permission, self-updater, online font provider, diagnostic export and cloud/device-transfer backups. Both builds require explicit in-app consent before processing notifications and provide Stop Slivue and withdrawal controls. The Play policy is still a preparation draft, not a finalized public privacy policy.
+
 - Notification display, grouping, and filtering are processed on the device. The current implementation does not upload notification content or replies to a Slivue developer server.
 - When you send a quick reply, Android passes it to the original messaging app through its notification action. That app handles subsequent delivery under its own policies.
 - Notification history is held in app memory, with limits of 150 notifications and 50 messages per notification. Notifications removed from Android's notification shade may remain in Slivue's in-memory history. After the app process restarts, active system notifications can be read again.
@@ -149,17 +151,17 @@ flowchart LR
 
 | Component | Current configuration |
 | --- | --- |
-| Language | Kotlin 2.0.21 |
+| Language | Kotlin 2.3.10 |
 | UI | Jetpack Compose · Material 3 |
 | Minimum Android version | Android 8.0 · API 26 |
-| Compile / target SDK | API 34 |
+| Compile / target SDK | API 36 |
 | Java | JDK 17 |
 | State and preferences | Kotlin Coroutines · Flow · DataStore |
 | Tests | JUnit · MockK · Turbine · Robolectric · Compose UI Test |
 
 ### Build locally
 
-Install Android SDK 34 and JDK 17, then run from the repository root:
+Install Android SDK 36 and JDK 17, then run from the repository root. The project uses AGP 8.13.2 and Gradle 8.14; the compatibility verification tasks cover both distribution flavors:
 
 ```powershell
 .\gradlew.bat testDebugUnitTest compileDebugKotlin assembleDebug lintRelease

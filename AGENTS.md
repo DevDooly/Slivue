@@ -2,13 +2,13 @@
 
 이 문서는 Antigravity 및 모든 AI 에이전트가 본 프로젝트(Slivue)에서 작업할 때 **항상 자동으로 로드되어 준수해야 하는 최상위 개발 지침**입니다.
 
-앱·프로젝트의 공식 이름은 **Slivue(슬리뷰)**입니다. 기존 설치와 외부 연동을 유지하기 위해 `com.devdooly.notificationedge`, 저장소 주소 `DevDooly/message_edge`, 데이터 저장키·테마·외부 인텐트 식별자는 이름 변경 대상에서 제외합니다. 과거 릴리스 기록과 당시 APK 파일명도 보존합니다.
+앱·프로젝트의 공식 이름은 **Slivue(슬리뷰)**입니다. 사용자의 2026-10-31 결정에 따라 **Google Play판(`play`)은 `com.devdooly.slivue`**, 기존 GitHub 직접 배포판(`direct`)은 `com.devdooly.notificationedge`를 사용합니다. 두 앱은 별도 설치이며 데이터·권한을 자동 이전하지 않습니다. Kotlin namespace·기존 데이터 저장키·테마·외부 인텐트 식별자·`DevDooly/message_edge` 외부 업데이트 경로·과거 릴리스와 APK 파일명은 보존합니다.
 
 ---
 
 ## 📌 1. 필수 사용자 규칙 (User Rules)
 
-* **언어 표준**: Git 커밋 메시지, 태그 메시지, README 등 모든 마크다운(`*.md`) 문서는 **반드시 한글로 작성**해야 합니다.
+* **언어 표준**: Git 커밋 메시지, 태그 메시지, README 등 모든 마크다운(`*.md`) 문서는 **반드시 한글로 작성**해야 합니다. 사용자가 명시적으로 요청한 영문 소개 파일 `README.en.md`만 영문 예외로 유지합니다.
 * **자동 Git 워크플로우**: 코드 수정 및 기능 구현 후 빌드 검증(`testDebugUnitTest compileDebugKotlin lintRelease assembleRelease`)을 수행하고, 별도의 추가 확인 요청 없이 **로컬 커밋 및 원격 저장소(`git push origin main` 및 태그 푸시)까지 자동으로 진행**해야 합니다.
 
 ---
@@ -53,6 +53,8 @@
 2. `docs/DEVELOPMENT_REFERENCE.md`에 최신 릴리스 내역 추가
 3. 빌드 검증: `./gradlew testDebugUnitTest compileDebugKotlin lintRelease assembleRelease`
 4. `apksigner verify --verbose --print-certs`로 APK 서명 확인
+   - 위 표준 명령은 `direct`·`play` 변형을 함께 검증하는 호환 별칭을 사용합니다. 실제 Play 후보는 `bundlePlayRelease`, 최종 로컬 제출 준비 검사는 `verifyPlaySubmissionReady`와 `preparePlaySubmission`입니다.
+   - 정책 초안·연락처 미정·업로드 키 미설정 상태의 AAB는 **미서명 기술 검증 후보**일 뿐입니다. 자동 Play 제출·서명 등록·호스팅·계정 약관 동의는 하지 않습니다. 직접 배포판의 릴리스 태그를 Play 심사 승인으로 해석하지 않습니다.
 5. 커밋 & 푸시:
    ```bash
    git add .

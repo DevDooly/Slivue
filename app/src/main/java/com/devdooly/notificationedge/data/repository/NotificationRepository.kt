@@ -10,6 +10,7 @@ import com.devdooly.notificationedge.data.model.EdgeNotification
 import com.devdooly.notificationedge.data.model.MessageItem
 import com.devdooly.notificationedge.data.model.NotificationActionItem
 import com.devdooly.notificationedge.util.AppLog
+import com.devdooly.notificationedge.util.PrivacyConsent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -117,6 +118,13 @@ object NotificationRepository {
         cancelAllNotificationsCallback?.invoke()
     }
 
+    /** 동의 철회·중지에서는 다른 앱의 원본 알림을 삭제하지 않고 Slivue 캐시만 비운다. */
+    fun clearMemoryOnly() {
+        cancelNotificationCallback = null
+        cancelAllNotificationsCallback = null
+        _notifications.value = emptyList()
+    }
+
     /** 진단 모드를 끌 때 메모리에 남은 Extras 덤프를 즉시 제거한다. */
     fun clearDiagnosticDumps() {
         _notifications.update { list ->
@@ -140,47 +148,47 @@ object NotificationRepository {
         autoDismiss: Boolean = true,
         onClose: () -> Unit
     ) {
+        val consent = PrivacyConsent.getInstance(context)
+        val generation = consent.accessGeneration
+        if (!consent.canProcessNotifications()) {
+            onClose()
+            return
+        }
         // 1. 오버레이 윈도우를 먼저 닫아 윈도우 포커스를 정상적으로 시스템/타깃 앱에 반환
         onClose()
 
-        // 2. 옵션이 켜져 있는 경우 해당 메시지 그룹을 알림 목록에서 자동 삭제
-        if (autoDismiss) {
-            removeNotification(notification.key)
-        }
+        consent.withCurrentAccess(generation) {
+            // 2. 옵션이 켜진 경우 해당 메시지 그룹을 자동 삭제한다.
+            if (autoDismiss) removeNotification(notification.key)
+            var launched = false
 
-        var launched = false
-
-        // 3. PendingIntent(특정 채팅방으로 이동) 실행 시도
-        if (notification.contentIntent != null) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    val options = ActivityOptions.makeBasic().apply {
-                        pendingIntentBackgroundActivityStartMode = ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+            // 3. 특정 대화방 PendingIntent를 우선 실행한다.
+            if (notification.contentIntent != null) {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        val options = ActivityOptions.makeBasic().apply {
+                            pendingIntentBackgroundActivityStartMode = ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                        }
+                        notification.contentIntent.send(context, 0, null, null, null, null, options.toBundle())
+                    } else {
+                        notification.contentIntent.send()
                     }
-                    notification.contentIntent.send(context, 0, null, null, null, null, options.toBundle())
-                } else {
-                    notification.contentIntent.send()
-                }
-                launched = true
-            } catch (e: Exception) {
-                AppLog.warning("NotificationRepo", "알림 PendingIntent 실행 실패", e)
-                launched = false
-            }
-        }
-
-        // 4. PendingIntent가 실패하거나 없는 경우 해당 앱의 런처 실행 (기존 태스크 유지)
-        if (!launched) {
-            try {
-                val launchIntent = context.packageManager.getLaunchIntentForPackage(notification.packageName)?.apply {
-                    // 미디어 재생 태스크를 초기화하지 않고 그대로 포그라운드로 복귀
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                }
-                if (launchIntent != null) {
-                    context.startActivity(launchIntent)
                     launched = true
+                } catch (e: Exception) {
+                    AppLog.warning("NotificationRepo", "알림 PendingIntent 실행 실패", e)
                 }
-            } catch (e: Exception) {
-                AppLog.warning("NotificationRepo", "앱 실행 Intent 처리 실패", e)
+            }
+
+            // 4. 전용 Intent가 없거나 실패하면 기존 태스크를 유지한 런처 실행을 시도한다.
+            if (!launched) {
+                try {
+                    val launchIntent = context.packageManager.getLaunchIntentForPackage(notification.packageName)?.apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    }
+                    if (launchIntent != null) context.startActivity(launchIntent)
+                } catch (e: Exception) {
+                    AppLog.warning("NotificationRepo", "앱 실행 Intent 처리 실패", e)
+                }
             }
         }
     }
@@ -191,6 +199,9 @@ object NotificationRepository {
         action: NotificationActionItem,
         replyText: String
     ) {
+        val consent = PrivacyConsent.getInstance(context)
+        val generation = consent.accessGeneration
+        if (!consent.canProcessNotifications()) return
         if (action.actionIntent == null || action.remoteInputKey == null) return
 
         try {
@@ -201,45 +212,37 @@ object NotificationRepository {
             val remoteInput = RemoteInput.Builder(action.remoteInputKey).build()
             RemoteInput.addResultsToIntent(arrayOf(remoteInput), intent, bundle)
 
-            action.actionIntent.send(context, 0, intent)
-
-            // 내 답장 메시지를 해당 알림 카드의 대화 목록에 즉시 추가하여 채팅방처럼 대화 유지
-            _notifications.update { list ->
-                list.map { notif ->
-                    if (notif.key == notificationKey) {
-                        val userMsg = MessageItem(
-                            sender = "나",
-                            text = replyText,
-                            timestamp = System.currentTimeMillis(),
-                            isFromUser = true
-                        )
-                        // 기존 메시지 목록이 비어있었다면 기존 text를 상대방 메시지로 먼저 넣고 내 메시지 추가
-                        val currentMsgs = if (notif.messages.isNotEmpty()) {
-                            notif.messages
-                        } else if (notif.text.isNotBlank()) {
-                            listOf(
-                                MessageItem(
-                                    sender = notif.title.ifBlank { notif.appName },
-                                    text = notif.text,
-                                    timestamp = notif.timestamp,
-                                    isFromUser = false
-                                )
-                            )
-                        } else {
-                            emptyList()
-                        }
-                        notif.copy(
-                            messages = (currentMsgs + userMsg).takeLast(MAX_MESSAGES_PER_NOTIFICATION),
-                            text = "나: $replyText",
-                            timestamp = System.currentTimeMillis()
-                        )
-                    } else {
-                        notif
-                    }
-                }
+            consent.withCurrentAccess(generation) {
+                action.actionIntent.send(context, 0, intent)
+                appendSentReply(notificationKey, replyText)
             }
         } catch (e: Exception) {
             AppLog.warning("NotificationRepo", "빠른 답장 전송 실패", e)
+        }
+    }
+
+    /** 전송과 같은 동의 모니터 안에서만 호출해 철회 뒤 답장 캐시를 갱신하지 않는다. */
+    private fun appendSentReply(notificationKey: String, replyText: String) {
+        _notifications.update { list ->
+            list.map { notif ->
+                if (notif.key != notificationKey) return@map notif
+                val userMessage = MessageItem(
+                    sender = "나", text = replyText,
+                    timestamp = System.currentTimeMillis(), isFromUser = true
+                )
+                val existingMessages = when {
+                    notif.messages.isNotEmpty() -> notif.messages
+                    notif.text.isNotBlank() -> listOf(MessageItem(
+                        sender = notif.title.ifBlank { notif.appName }, text = notif.text,
+                        timestamp = notif.timestamp, isFromUser = false
+                    ))
+                    else -> emptyList()
+                }
+                notif.copy(
+                    messages = (existingMessages + userMessage).takeLast(MAX_MESSAGES_PER_NOTIFICATION),
+                    text = "나: $replyText", timestamp = System.currentTimeMillis()
+                )
+            }
         }
     }
 

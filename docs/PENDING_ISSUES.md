@@ -60,10 +60,10 @@
 
 ## 📌 이슈 #2: Google Play 최초 출시 준비
 
-2026-09-05 기준 계획을 작성했으며, 앱 코드 변경이나 Play 제출은 아직 수행하지 않았다. 상세 작업 순서와 근거는 [Google Play 최초 출시 계획](GOOGLE_PLAY_LAUNCH_PLAN.md)을 따른다.
+2026-10-31에 사용자가 Play판을 `com.devdooly.slivue`로 별도 설치하도록 결정했고 빌드·권한·정책 준비를 구현 중이다. 코드 작성과 Play 제출은 구분한다. 상세 현황은 [제출 준비·심사 점검표](GOOGLE_PLAY_SUBMISSION_CHECKLIST.md), 기존 근거는 [최초 출시 계획](GOOGLE_PLAY_LAUNCH_PLAN.md)을 따른다.
 
 - [ ] 개발자 계정 유형·생성일·국가·검증 및 비공개 테스트 적용 여부 확인
-- [ ] 기존 서명 계보의 최초 Play 등록 가능성과 실제 Play 업데이트 호환성 검증
+- [ ] 별도 업로드 키와 신규 Play 앱 서명 결정, 실제 Play 설치물의 업데이트 검증
 - [ ] Play용 AAB/업데이트 경로 분리, 자체 APK 설치 권한·코드 제외
 - [ ] API 36 및 최종 AAB·16KB·One UI 동작 검증
 - [ ] 알림 접근 고지·동의, 개인정보처리방침·Data safety, FGS 신고·중지 UX 정리

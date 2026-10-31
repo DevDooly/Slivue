@@ -709,6 +709,23 @@ graph TD
 
 ---
 
+### 69) Google Play 전용 배포와 개인정보 접근 게이트 (`v1.3.27`, 빌드 157)
+
+- 사용자 결정: Play 설치 식별자는 `com.devdooly.slivue`, GitHub 직접 배포판은 기존 `com.devdooly.notificationedge`를 유지한다. Kotlin namespace·데이터 키·외부 명령 식별자는 유지하며, task affinity와 실제 패키지 표시는 설치 식별자에 맞춘다. 두 앱 사이 자동 데이터·권한 이전은 없다.
+- AGP 8.13.2·Kotlin 2.3.10·Gradle 8.14·JDK 17과 compile/target 36으로 이행했다. 최소 API 26은 유지한다.
+- `src/direct`에 GitHub 업데이터·온라인 폰트·진단 내보내기를 격리하고, `src/play`는 자체 설치·인터넷 권한 없이 스토어 링크·시스템/사용자 폰트만 제공한다. Play 백업은 legacy/cloud/D2D 모두 전역 제외 규칙으로 묶는다.
+- `PrivacyConsent`는 설치별 noBackup 영역에 동의 버전·시각·중지 상태를 저장한다. 기존 OS 허용 이력이 있어야 권한 철회로 자동 취소하며, 최초 동의 직후 시스템 설정을 열기 전 동의를 지우지 않는다.
+- Windows 테스트에서 `File.renameTo`가 기존 대상 교체에 조용히 실패하는 것을 실제 디스크 내용으로 확인했다. `AtomicConsentStore`는 임시 파일 동기화 후 API 26의 `Files.move(ATOMIC_MOVE, REPLACE_EXISTING)`로 교체하고 비원자 폴백 없이 실패 시 접근을 차단한다.
+- 철회·중지와 마지막 알림 저장·답장 전송·미디어 제어·발견 앱 기록은 같은 동의 모니터와 세대 번호로 선형화한다. 오래된 큐나 늦은 리스너 해제가 재개 상태를 덮지 않도록 연결 상태·콜백 소유권도 확인한다.
+- FGS 새 LOW 채널·설정 진입·중지 액션, 선택 알림 보내기 권한, 명시적 고지 동의·나중에·정책 열기·철회·이력 비우기 UI를 한·영으로 제공한다. 정책 화면은 로컬 HTML만 표시하며 JavaScript·네트워크·파일/콘텐츠 접근을 차단한다.
+- 정책은 운영 이름·이메일·공개 URL이 미정인 `draft`다. `bundlePlayRelease`는 미서명 기술 후보를 허용하지만 `preparePlaySubmission`은 실제 연락처·확정 정책·시행일·독립 업로드 키와 모든 AAB 파일의 서명을 확인해야 한다. 자동 Console 제출·키 등록·정책 호스팅은 수행하지 않는다.
+- 검사 도구는 AAB protobuf manifest와 `resources.pb`, 실제 XML·DEX·64비트 ELF를 읽어 패키지·SDK·금지 권한/코드·리소스 연결·모든 백업 제외·16KB 정렬을 검사한다. 제조사 백업 동작·16KB 실제 실행·실제 Play 설치/심사는 정적 검사와 별개다.
+
+- 실제 검증: 단위 575개(직접 배포 296 / Play 279), Node 37개, API 26·36 각각 계측 9개 통과. 린트 오류 0이며 경고는 별도 관리한다. 직접 배포 기존 APK의 두 OS 업데이트와 기존/회전 인증서 검증, APK ZIP·64비트 ELF 정렬도 확인했다.
+- 실제 철회 시험 중 화면 복귀까지 정리가 지연되는 경로를 발견하여 Application의 정확한 Secure URI 관찰과 리스너 종료 검사를 추가했다. 정책 화면에 머무른 상태에서 동의·메모리·디스크 철회를 계측했다.
+
+작업 결과·범위·해시: [Play 준비 검증 보고서](GOOGLE_PLAY_PREPARATION_REPORT.md), 잔여 P0: [Play 제출 점검표](GOOGLE_PLAY_SUBMISSION_CHECKLIST.md), 사용자 안내: [v1.3.27 릴리스 안내](releases/v1.3.27.md).
+
 ## 💻 3. 표준 빌드, 버전 관리 및 Git 릴리즈 명령어
 
 ### 1) 버전 판올림 체크리스트

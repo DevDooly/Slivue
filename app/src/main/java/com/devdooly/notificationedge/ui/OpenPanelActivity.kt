@@ -13,6 +13,7 @@ import com.devdooly.notificationedge.ui.shortcuts.PanelShortcuts
 import com.devdooly.notificationedge.R
 import com.devdooly.notificationedge.ui.overlay.EdgePanelLauncher
 import com.devdooly.notificationedge.ui.settings.SettingsActivity
+import com.devdooly.notificationedge.util.PrivacyConsent
 
 /**
  * Good Lock (One Hand Operation +), 엣지 패널 바로가기, 런처 숏컷 등에서
@@ -31,7 +32,7 @@ class OpenPanelActivity : Activity() {
             return
         }
 
-        if (Settings.canDrawOverlays(this)) {
+        if (Settings.canDrawOverlays(this) && PrivacyConsent.canProcessNotifications(this)) {
             EdgePanelLauncher.toggle(this)
         } else {
             Toast.makeText(this, getString(R.string.panel_permission_required), Toast.LENGTH_SHORT).show()

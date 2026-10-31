@@ -34,10 +34,11 @@ Available in Korean and English
 
 Permissions and data handling
 • Notification access lets Slivue read notification content and reply actions to display and filter notifications.
+• The optional pause-video feature also accesses active media sessions.
 • Display over other apps lets the edge handle and lighting appear while you use other apps.
 • Notifications are used to show the running service status on supported Android versions.
 • Notification display and filtering are processed on your device. Quick replies are passed to the original messaging app, which handles their delivery.
-• Settings may be backed up and restored according to your Android backup settings. Some optional fonts are downloaded through their provider.
+• This Play build has no Internet permission, downloaded font provider or APK self-updater. Settings and imported fonts are kept in app storage and excluded from cloud backup and device-to-device transfer.
 • Use Slivue without creating an account. No advertising SDKs are included.
 
 Before you start

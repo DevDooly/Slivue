@@ -6,6 +6,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -23,23 +31,51 @@ import com.devdooly.notificationedge.R
 import com.devdooly.notificationedge.ui.theme.DarkBackground
 import com.devdooly.notificationedge.data.model.EdgeSide
 import com.devdooly.notificationedge.util.AppLog
+import com.devdooly.notificationedge.util.PrivacyConsent
+import com.devdooly.notificationedge.data.repository.NotificationRepository
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val privacyState by viewModel.privacyState.collectAsStateWithLifecycle()
+    var showDisclosure by rememberSaveable { mutableStateOf(false) }
+    var pendingHandleEnable by rememberSaveable { mutableStateOf(false) }
 
     var hasOverlayPermission by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
-    var hasNotificationPermission by remember { mutableStateOf(isNotificationServiceEnabled(context)) }
+    var hasNotificationPermission by remember { mutableStateOf(PrivacyConsent.hasNotificationAccess(context)) }
     var isIgnoringBatteryOptimizations by remember { mutableStateOf(isBatteryOptimized(context)) }
+    var hasPostPermission by remember { mutableStateOf(hasPostNotificationPermission(context)) }
+    val postPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        hasPostPermission = hasPostNotificationPermission(context)
+    }
+    val openNotificationAccess = { openNotificationAccessSettings(context) }
+    val readPolicy = { context.startActivity(Intent(context, PrivacyPolicyActivity::class.java)); Unit }
+
+    if (showDisclosure) {
+        NotificationDisclosureDialog(
+            onAccept = {
+                if (viewModel.acceptNotificationDisclosure()) {
+                    if (pendingHandleEnable) viewModel.updateServiceEnabled(true)
+                    pendingHandleEnable = false
+                    showDisclosure = false
+                    openNotificationAccess()
+                } else Toast.makeText(context, R.string.privacy_save_failed, Toast.LENGTH_LONG).show()
+            },
+            onLater = { showDisclosure = false; pendingHandleEnable = false },
+            onReadPolicy = readPolicy,
+        )
+    }
 
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
                 hasOverlayPermission = Settings.canDrawOverlays(context)
-                hasNotificationPermission = isNotificationServiceEnabled(context)
+                viewModel.reconcileNotificationAccess()
+                hasNotificationPermission = PrivacyConsent.hasNotificationAccess(context)
                 isIgnoringBatteryOptimizations = isBatteryOptimized(context)
+                hasPostPermission = hasPostNotificationPermission(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -67,10 +103,16 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            if (BuildConfig.IS_PLAY_DISTRIBUTION && BuildConfig.IS_PLAY_PREPARATION_BUILD) {
+                item(key = "play-preparation") { PlayPreparationCard() }
+            }
             item(key = "master-switch") {
                 MasterSwitchCard(
                     enabled = settings.isServiceEnabled,
-                    onCheckedChange = viewModel::updateServiceEnabled
+                    onCheckedChange = { enabled ->
+                        if (enabled && !privacyState.hasCurrentConsent) { pendingHandleEnable = true; showDisclosure = true }
+                        else viewModel.updateServiceEnabled(enabled)
+                    }
                 )
             }
 
@@ -79,6 +121,14 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                     hasOverlay = hasOverlayPermission,
                     hasNotification = hasNotificationPermission,
                     hasBatteryOpt = isIgnoringBatteryOptimizations,
+                    hasPostNotification = hasPostPermission,
+                    onGrantPostNotification = {
+                        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                            postPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName))
+                        }
+                    },
                     onGrantOverlay = {
                         val intent = Intent(
                             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -87,8 +137,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                         context.startActivity(intent)
                     },
                     onGrantNotification = {
-                        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                        context.startActivity(intent)
+                        if (privacyState.hasCurrentConsent) openNotificationAccess() else showDisclosure = true
                     },
                     onGrantBattery = {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -100,6 +149,25 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                             }
                         }
                     }
+                )
+            }
+
+            item(key = "privacy") {
+                PrivacySettingsCard(
+                    hasConsent = privacyState.hasCurrentConsent,
+                    isPaused = privacyState.isPaused,
+                    onReviewAccess = { showDisclosure = true },
+                    onStop = viewModel::pauseNotificationProcessing,
+                    onResume = {
+                        if (!hasNotificationPermission) openNotificationAccess() else viewModel.resumeNotificationProcessing()
+                    },
+                    onRevoke = viewModel::revokeNotificationDisclosure,
+                    onReadPolicy = readPolicy,
+                    onClearHistory = {
+                        NotificationRepository.clearMemoryOnly()
+                        Toast.makeText(context, R.string.privacy_clear_history_done, Toast.LENGTH_SHORT).show()
+                    },
+                    onManageData = { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))) },
                 )
             }
 
@@ -220,15 +288,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
             }
 
             item(key = "diagnostics") {
-                SettingsSection(
-                    stringResource(R.string.design_diagnostics), Icons.Default.BugReport,
-                    summary = stringResource(if (settings.diagnosticModeEnabled) R.string.design_diagnostics_on else R.string.design_diagnostics_off)
-                ) {
-                    NotificationDebugDumpCard(
-                        enabled = settings.diagnosticModeEnabled,
-                        onEnabledChange = viewModel::updateDiagnosticModeEnabled
-                    )
-                }
+                DistributionDiagnosticsSection(settings.diagnosticModeEnabled, viewModel::updateDiagnosticModeEnabled)
             }
 
             // 다운로드 중 메뉴를 접더라도 업데이트 작업의 Composition을 제거하지 않는다.
@@ -240,10 +300,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     }
 }
 
-private fun isNotificationServiceEnabled(context: Context): Boolean {
-    val flat = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
-    return flat != null && flat.contains(context.packageName)
-}
+private fun hasPostNotificationPermission(context: Context): Boolean =
+    (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) &&
+        NotificationManagerCompat.from(context).areNotificationsEnabled()
 
 private fun isBatteryOptimized(context: Context): Boolean {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

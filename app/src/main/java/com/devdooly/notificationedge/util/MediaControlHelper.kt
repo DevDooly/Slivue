@@ -17,15 +17,23 @@ object MediaControlHelper {
     internal enum class PauseResult { NOT_NEEDED, PAUSED, UNCONFIRMED, UNAVAILABLE }
 
     internal suspend fun pauseVideoBeforePanel(context: Context): PauseResult = withContext(Dispatchers.IO) {
+        val consent = PrivacyConsent.getInstance(context)
+        val generation = consent.accessGeneration
+        if (!consent.canProcessNotifications()) return@withContext PauseResult.UNAVAILABLE
         try {
             val manager = context.getSystemService(MediaSessionManager::class.java)
                 ?: return@withContext PauseResult.UNAVAILABLE
-            val sessions = manager.getActiveSessions(ComponentName(context, NotificationListener::class.java))
+            val sessions = consent.withCurrentAccess(generation) {
+                manager.getActiveSessions(ComponentName(context, NotificationListener::class.java))
+            } ?: return@withContext PauseResult.UNAVAILABLE
             // 플랫폼의 우선순위 순서를 따른다. 음악 앱과 Slivue 자체는 제외한다.
             val target = sessions.firstOrNull {
-                isPlaybackActive(it.playbackState?.state) && isVideoApp(context, it.packageName)
+                val playbackState = consent.withCurrentAccess(generation) { it.playbackState?.state }
+                // APK 메타데이터 파일 I/O는 동의 모니터 밖에서 수행한다.
+                isPlaybackActive(playbackState) && isVideoApp(context, it.packageName)
             } ?: return@withContext PauseResult.NOT_NEEDED
-            pauseAndAwait(AndroidPlaybackSession(target))
+            if (!consent.canProcessNotifications()) return@withContext PauseResult.UNAVAILABLE
+            pauseAndAwait(AndroidPlaybackSession(target, consent, generation))
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {
@@ -68,10 +76,16 @@ object MediaControlHelper {
         fun pause()
     }
 
-    private class AndroidPlaybackSession(private val controller: MediaController) : PlaybackSession {
-        override val state get() = controller.playbackState?.state
-        override val actions get() = controller.playbackState?.actions ?: 0L
-        override fun pause() = controller.transportControls.pause()
+    private class AndroidPlaybackSession(
+        private val controller: MediaController,
+        private val consent: PrivacyConsent,
+        private val generation: Long
+    ) : PlaybackSession {
+        override val state get() = consent.withCurrentAccess(generation) { controller.playbackState?.state }
+        override val actions get() = consent.withCurrentAccess(generation) { controller.playbackState?.actions ?: 0L } ?: 0L
+        override fun pause() {
+            consent.withCurrentAccess(generation) { controller.transportControls.pause() }
+        }
     }
 
     internal suspend fun pauseAndAwait(session: PlaybackSession): PauseResult {

@@ -22,11 +22,13 @@ jobs:
       matrix:
         include:
           - api-level: 31
-            task: pixel2Api31DebugAndroidTest
+            task: pixel2Api31DirectDebugAndroidTest
           - api-level: 34
-            task: pixel2Api34DebugAndroidTest
+            task: pixel2Api34DirectDebugAndroidTest
           - api-level: 35
-            task: pixel2Api35DebugAndroidTest
+            task: pixel2Api35DirectDebugAndroidTest
+          - api-level: 36
+            task: pixel2Api36DirectDebugAndroidTest
 
     steps:
       - name: Checkout Code
@@ -115,7 +117,7 @@ jobs:
           "$ADB" shell settings put global animator_duration_scale 0
 
       - name: Run API 26 Test
-        run: ./gradlew connectedDebugAndroidTest --no-daemon
+        run: ./gradlew connectedDirectDebugAndroidTest --no-daemon
 
       - name: Stop API 26 Emulator
         if: always()

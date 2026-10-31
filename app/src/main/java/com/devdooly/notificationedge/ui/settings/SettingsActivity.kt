@@ -12,6 +12,7 @@ import com.devdooly.notificationedge.R
 import com.devdooly.notificationedge.data.model.AppSettings
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.service.OverlayServiceStarter
+import com.devdooly.notificationedge.util.PrivacyConsent
 import com.devdooly.notificationedge.ui.theme.NotificationEdgeTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -51,11 +52,12 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        PrivacyConsent.getInstance(this).reconcileNotificationAccess()
         checkAndStartService()
     }
 
     private fun checkAndStartService() {
-        if (Settings.canDrawOverlays(this)) {
+        if (Settings.canDrawOverlays(this) && PrivacyConsent.canProcessNotifications(this)) {
             lifecycleScope.launch {
                 val settings = settingsRepository.settingsFlow.first()
                 if (settings.isServiceEnabled || settings.isEdgeLightingEnabled) {

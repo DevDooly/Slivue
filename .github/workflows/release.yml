@@ -76,22 +76,22 @@ jobs:
           test "v${VERSION_NAME}" = "$GITHUB_REF_NAME"
 
       - name: Run Tests and Build Release APK
-        run: ./gradlew testDebugUnitTest compileDebugKotlin assembleDebugAndroidTest lintRelease assembleRelease assembleMinifiedRelease --no-daemon
+        run: ./gradlew testDirectDebugUnitTest compileDirectDebugKotlin assembleDirectDebugAndroidTest lintDirectRelease assembleDirectRelease assembleDirectMinifiedRelease --no-daemon
 
       - name: Apply Rotated Signing Lineage
         run: |
           chmod +x scripts/sign-rotated-apk.sh
           scripts/sign-rotated-apk.sh \
-            app/build/outputs/apk/release/app-release.apk \
-            app/build/outputs/apk/minifiedRelease/app-minifiedRelease.apk
+            app/build/outputs/apk/direct/release/app-direct-release.apk \
+            app/build/outputs/apk/direct/minifiedRelease/app-direct-minifiedRelease.apk
 
       - name: Prepare APK Assets
         run: |
           mkdir -p release_assets
-          cp app/build/outputs/apk/release/app-release.apk release_assets/Slivue-candidate.apk
+          cp app/build/outputs/apk/direct/release/app-direct-release.apk release_assets/Slivue-candidate.apk
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            cp app/build/outputs/apk/release/app-release.apk "release_assets/Slivue-${GITHUB_REF_NAME}.apk"
-            cp app/build/outputs/apk/release/app-release.apk release_assets/Slivue.apk
+            cp app/build/outputs/apk/direct/release/app-direct-release.apk "release_assets/Slivue-${GITHUB_REF_NAME}.apk"
+            cp app/build/outputs/apk/direct/release/app-direct-release.apk release_assets/Slivue.apk
             sha256sum "release_assets/Slivue-${GITHUB_REF_NAME}.apk" > "release_assets/Slivue-${GITHUB_REF_NAME}.apk.sha256"
             sha256sum release_assets/Slivue.apk > release_assets/Slivue.apk.sha256
           fi

@@ -11,6 +11,7 @@ import com.devdooly.notificationedge.data.model.EdgeSide
 import com.devdooly.notificationedge.data.repository.NotificationRepository
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.service.OverlayServiceStarter
+import com.devdooly.notificationedge.util.PrivacyConsent
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -36,6 +37,23 @@ class SettingsViewModel internal constructor(
         started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
         initialValue = AppSettings()
     )
+
+    private val privacyConsent = PrivacyConsent.getInstance(application)
+    val privacyState = privacyConsent.state
+
+    fun acceptNotificationDisclosure(): Boolean = privacyConsent.acceptDisclosure()
+
+    fun revokeNotificationDisclosure() = privacyConsent.revokeDisclosure()
+
+    fun pauseNotificationProcessing() = privacyConsent.pauseProcessing()
+
+    fun resumeNotificationProcessing(): Boolean {
+        val resumed = privacyConsent.resumeProcessing()
+        if (resumed) startOverlayServiceIfNeeded(settings.value.isServiceEnabled || settings.value.isEdgeLightingEnabled)
+        return resumed
+    }
+
+    fun reconcileNotificationAccess() = privacyConsent.reconcileNotificationAccess()
 
     fun updateServiceEnabled(enabled: Boolean) = updateSettings {
         settingsRepository.updateServiceEnabled(enabled)
@@ -153,7 +171,7 @@ class SettingsViewModel internal constructor(
 
     private fun startOverlayServiceIfNeeded(needed: Boolean) {
         val application = getApplication<Application>()
-        if (needed && Settings.canDrawOverlays(application)) {
+        if (needed && PrivacyConsent.canProcessNotifications(application) && Settings.canDrawOverlays(application)) {
             OverlayServiceStarter.start(application)
         }
     }

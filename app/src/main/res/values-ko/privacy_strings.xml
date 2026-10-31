@@ -1,0 +1,37 @@
+<resources>
+    <string name="overlay_service_stop">전체 서비스 중지</string>
+    <string name="privacy_title">개인정보와 알림 접근</string>
+    <string name="privacy_disclosure_title">알림 접근 허용 전에 확인해 주세요</string>
+    <string name="privacy_disclosure_data">Slivue는 이 화면을 닫은 뒤에도 앱 이름·발신자·알림 제목과 메시지 본문·시각·답장 동작을 읽습니다. 알림에는 사적이거나 민감한 정보가 포함될 수 있습니다.</string>
+    <string name="privacy_disclosure_purpose">이 정보는 엣지 패널의 알림 표시·필터링과 사용자가 작성한 빠른 답장에 사용합니다. 답장은 원래 메시지 앱에 전달되며 이후 전송은 해당 앱이 처리합니다. 선택 기능인 영상 일시 정지는 활성 미디어 세션에도 접근합니다.</string>
+    <string name="privacy_disclosure_play">Play판은 알림을 기기에서 처리합니다. 인터넷 권한·광고/분석 SDK·클라우드 백업·외부 다운로드 폰트 제공자·APK 자체 업데이터를 포함하지 않습니다. 가져온 폰트와 설정은 앱 저장소에 보관합니다.</string>
+    <string name="privacy_disclosure_direct">GitHub판은 알림을 기기에서 처리합니다. 답장은 원래 앱에 전달하며, 선택 폰트와 업데이트 확인에는 인터넷이 사용될 수 있습니다. Android 백업으로 설정이 복원될 수 있습니다. 진단 정보는 선택 사항이며 사적인 내용이 남을 수 있습니다.</string>
+    <string name="privacy_disclosure_control">나중에를 선택하면 권한을 허용하지 않아도 됩니다. 전체 서비스 중지는 알림 처리·오버레이를 멈추고 메모리 이력을 비웁니다. 동의를 철회해도 처리가 중지되며, 시스템의 알림 접근 권한은 Android 설정에서 별도로 해제할 수 있습니다.</string>
+    <string name="privacy_accept">동의하고 설정 열기</string>
+    <string name="privacy_later">나중에</string>
+    <string name="privacy_save_failed">선택을 저장하지 못해 알림 접근 설정을 열지 않았습니다. 다시 시도해 주세요.</string>
+    <string name="privacy_policy_open">개인정보 처리 안내 읽기</string>
+    <string name="privacy_policy_public">공개 개인정보처리방침 열기</string>
+    <string name="privacy_policy_title">개인정보처리방침</string>
+    <string name="privacy_processing_active">동의를 저장했습니다. Android 알림 접근이 허용된 경우 알림을 처리합니다.</string>
+    <string name="privacy_processing_paused">Slivue가 중지되어 알림 처리와 오버레이가 일시 중단되었습니다.</string>
+    <string name="privacy_processing_not_consented">안내에 동의하고 Android 알림 접근을 허용하기 전에는 알림 내용을 처리하지 않습니다.</string>
+    <string name="privacy_resume">Slivue 다시 시작</string>
+    <string name="privacy_revoke">동의 철회 및 중지</string>
+    <string name="privacy_clear_history">Slivue 알림 이력 비우기</string>
+    <string name="privacy_clear_history_done">Slivue 이력을 비웠습니다. 원래 앱의 알림은 지우지 않았습니다.</string>
+    <string name="privacy_delete_data">앱 데이터 관리·삭제</string>
+    <string name="privacy_delete_description">Android 앱 저장공간 설정에서 필터·발견 앱·폰트·설정을 삭제할 수 있습니다. Slivue가 초기화되며 다른 앱의 메시지는 삭제하지 않습니다.</string>
+    <string name="privacy_open_failed">이 링크를 열 수 있는 앱이 없습니다.</string>
+    <string name="privacy_back">뒤로</string>
+    <string name="privacy_asset_error">개인정보 안내를 불러오지 못했습니다. 안내를 확인하기 전에는 알림 접근을 허용하지 마세요.</string>
+    <string name="privacy_post_title">서비스 상태 알림 보내기 (선택)</string>
+    <string name="privacy_post_description">Slivue 실행 상태와 중지 버튼을 알림으로 확인합니다. 다른 앱의 알림을 읽는 권한과는 별개입니다.</string>
+    <string name="privacy_review">알림 접근 안내 확인</string>
+    <string name="play_preparation_title">Play 등록 준비 빌드 — 제출 불가</string>
+    <string name="play_preparation_description">공개 개발자 연락처·최종 개인정보처리방침·업로드 키·Play Console 검토가 완료되지 않았습니다. 이 빌드는 로컬 검증용입니다.</string>
+    <string name="play_updates_title">Google Play 업데이트</string>
+    <string name="play_updates_description">이 빌드는 APK 업데이트를 내려받거나 직접 설치하지 않습니다. 앱 출시 후 Google Play를 통해 업데이트합니다.</string>
+    <string name="play_current_version">현재 버전: %1$s</string>
+    <string name="play_open_store">Google Play 열기</string>
+</resources>

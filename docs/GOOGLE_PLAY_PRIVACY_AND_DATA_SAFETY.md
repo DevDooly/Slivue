@@ -6,6 +6,16 @@
 
 [전체 출시 계획](GOOGLE_PLAY_LAUNCH_PLAN.md) · [서명·수익화 전략](GOOGLE_PLAY_SIGNING_AND_MONETIZATION.md)
 
+### 2026-10-31 구현 착수 업데이트
+
+아래 본문은 **2026-09-05의 직접 배포판 감사·계획 기록**을 보존한 것이다. 새 Play판의 최종 상태를 뜻하지 않는다. 사용자는 아직 Play 앱을 등록하지 않았고, 새 Play 패키지를 **`com.devdooly.slivue`**로 선택했다. 기존 GitHub판 `com.devdooly.notificationedge`는 업데이트 호환성을 위해 유지한다. 두 앱의 설정·권한·이력은 자동 이전되지 않는다.
+
+새 Play판은 별도 AAB, 자체 APK 설치·업데이트/Google Fonts 제공자/알림 원문 진단 내보내기 제외, 백업·D2D 제외 규칙, 비백업 동의 기록, 명시 고지·권한 확인·전체 중지 흐름을 준비하고 있다. 구현 완료와 최종 산출물·통신·실기기 검증은 각각 증거로 확인해야 한다.
+
+공개 개발자명·문의 이메일은 사용자 답변상 **미정**이다. [한국어 정책 HTML 초안](privacy/ko.html)·[영어 정책 HTML 초안](privacy/en.html)과 앱 내부용 동일 전문은 **Google Play판 전용 준비본**이며, 최종 시행 중인 공개 정책이 아니다. 운영 정보·공개 URL·시행일 확정과 최종 구현 검토 전에는 그대로 제출하지 않는다. 직접 배포판의 기존 Google Fonts·GitHub 통신·백업 동작에 이 Play 전용 초안을 무조건 적용하지 않는다.
+
+남은 순서, Data safety 잠정 답과 확정 증거, 권한/중지 검증, FGS 신고·시연, 소유자의 실제 Console 작업은 [제출 준비·심사 점검표](GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)에서 관리한다. 현재 **“데이터 수집 없음” 최종 신고는 확정하지 않았다.**
+
 ## 2. 현재 데이터 흐름
 
 | 정보·동작 | 소스에서 확인한 처리 | 보존·외부 경계 | 출시 전 결정 |
@@ -15,8 +25,8 @@
 | 빠른 답장 | Repository의 `RemoteInput`을 통해 원래 앱의 `PendingIntent`로 전달 | 사용자가 지정한 답장이 원래 메신저 앱으로 전달됨 | 자체 서버 미사용과 다른 앱 전달을 구분해 설명 |
 | 발견 앱 목록·제외 앱·차단어 | [SettingsRepository](../app/src/main/java/com/devdooly/notificationedge/data/repository/SettingsRepository.kt)에 영속 저장 | DataStore, 설정 백업 대상. 전체 설치 앱 조회 권한은 없음 | 삭제·백업·권한 철회 후 보존 여부 확정 |
 | 폰트 파일·파일명 | [CustomFontManager](../app/src/main/java/com/devdooly/notificationedge/util/CustomFontManager.kt)가 사용자 선택 파일을 내부 저장소로 복사 | 사용자가 삭제하기 전 보존, D2D 이동 가능성 | 폰트 삭제 UI·백업 정책·재배포 권리 확인 |
-| 선택 Google Fonts | [FontOption](../app/src/main/java/com/devdooly/notificationedge/ui/theme/FontOption.kt)의 GMS 제공자 사용 | 제공자에 의한 통신 가능. 실제 요청·데이터 항목 미측정 | 시스템/사용자 서체로 간소화하거나 전송·라이선스 감사 |
-| GitHub 업데이트 | [AppUpdateManager](../app/src/main/java/com/devdooly/notificationedge/data/updater/AppUpdateManager.kt)의 HTTPS API·다운로드 요청 | 서버에는 통상 접속 메타데이터가 보일 수 있음. 실제 서버 보유정책은 별도 확인 | Play 산출물에서 자체 업데이트 경로 제외 |
+| 선택 Google Fonts | [직접 배포 FontOption](../app/src/direct/java/com/devdooly/notificationedge/ui/theme/FontOption.kt)의 GMS 제공자 사용 | 제공자에 의한 통신 가능. 실제 요청·데이터 항목 미측정 | 시스템/사용자 서체로 간소화하거나 전송·라이선스 감사 |
+| GitHub 업데이트 | [직접 배포 AppUpdateManager](../app/src/direct/java/com/devdooly/notificationedge/data/updater/AppUpdateManager.kt)의 HTTPS API·다운로드 요청 | 서버에는 통상 접속 메타데이터가 보일 수 있음. 실제 서버 보유정책은 별도 확인 | Play 산출물에서 자체 업데이트 경로 제외 |
 | 진단 덤프·클립보드 | 옵트인 덤프, 부분 패턴 마스킹, 사용자 복사 | 대화 문장·이름·방 제목 전체를 익명화하지 않음 | 첫 Play판에서 원문 덤프/전체 복사 제외 권고 |
 | 광고·분석·계정 SDK | 현재 런타임 의존성에 광고·분석·Crashlytics·로그인 SDK를 찾지 못함 | 소스 감사 결과이며 통신 부재 실측 증거는 아님 | 무광고 출시 유지, 최종 전이 SDK 재검사 |
 

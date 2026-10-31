@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import com.devdooly.notificationedge.data.repository.SettingsRepository
+import com.devdooly.notificationedge.util.PrivacyConsent
 
 /**
  * Good Lock(One Hand Operation +), Tasker, 숏컷 등에서
@@ -14,6 +15,7 @@ import com.devdooly.notificationedge.data.repository.SettingsRepository
 class OpenPanelReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (!PrivacyConsent.canProcessNotifications(context)) return
         val repository = SettingsRepository.getInstance(context)
         if (!repository.isExternalControlEnabledSync()) return
         if (!Settings.canDrawOverlays(context)) return

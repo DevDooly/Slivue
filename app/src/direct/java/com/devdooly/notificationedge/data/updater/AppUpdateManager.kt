@@ -35,6 +35,7 @@ internal data class ReleaseAsset(val name: String, val downloadUrl: String)
 
 internal data class ReleaseDownloads(val apkUrl: String, val checksumUrl: String?)
 
+/** 직접 배포판 전용 업데이터. Play 소스 세트에는 포함하지 않는다. */
 object AppUpdateManager {
 
     private const val GITHUB_REPO = "DevDooly/message_edge"

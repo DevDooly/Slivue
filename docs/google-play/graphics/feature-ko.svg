@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500" role="img" aria-labelledby="title description">
+  <title id="title">Slivue — 화면은 그대로, 알림은 바로.</title>
+  <desc id="description">기존 Slivue 아이콘과 네이비·블루 브랜드 색상을 사용한 Google Play 기능 그래픽. 앱 화면이나 출시 배지를 표현하지 않습니다.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071022"/>
+      <stop offset="1" stop-color="#0d2443"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00c4d0"/>
+      <stop offset="0.55" stop-color="#4382ff"/>
+      <stop offset="1" stop-color="#7b55ff"/>
+    </linearGradient>
+    <clipPath id="icon-clip"><rect x="72" y="130" width="240" height="240" rx="52"/></clipPath>
+  </defs>
+  <rect width="1024" height="500" fill="url(#background)"/>
+  <path d="M0 436H1024" stroke="#163352" stroke-width="1"/>
+  <image href="../../icons/play_store/notification_edge_sliding_panel_512.png" x="72" y="130" width="240" height="240" clip-path="url(#icon-clip)"/>
+  <text x="376" y="230" fill="#f7f9fc" font-family="'Segoe UI', 'Malgun Gothic', sans-serif" font-size="90" font-weight="700" letter-spacing="-3">Slivue</text>
+  <text x="380" y="288" fill="#bacee9" font-family="'Malgun Gothic', 'Segoe UI', sans-serif" font-size="34" font-weight="400">
+    <tspan x="380" dy="0">화면은 그대로,</tspan>
+    <tspan x="380" dy="46">알림은 바로.</tspan>
+  </text>
+  <rect x="380" y="370" width="64" height="4" rx="2" fill="#4382ff"/>
+  <rect x="970" y="130" width="8" height="240" rx="4" fill="url(#edge)"/>
+</svg>

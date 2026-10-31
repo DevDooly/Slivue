@@ -13,6 +13,7 @@ import com.devdooly.notificationedge.data.model.EdgeNotification
 import com.devdooly.notificationedge.data.model.NotificationActionItem
 import com.devdooly.notificationedge.data.repository.NotificationRepository
 import com.devdooly.notificationedge.ui.overlay.EdgePanelActivity
+import com.devdooly.notificationedge.util.PrivacyConsent
 import org.junit.After
 import org.junit.Before
 import org.junit.Assert.*
@@ -25,23 +26,53 @@ import java.io.FileInputStream
 class PanelWindowInstrumentedTest {
     @get:Rule val composeRule = createEmptyComposeRule()
     private var scenario: ActivityScenario<EdgePanelActivity>? = null
-    private val testKey = "slivue-window-ime-regression"
+    private val testKey = "slivue-window-ime-regression-${System.nanoTime()}"
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private var originalAccessibilityFlags = 0
+    private var accessibilityConfigured = false
+    private var listenerWasEnabled = false
+    private var permissionSetupStarted = false
 
     @Before fun observeSystemWindows() {
+        val context = instrumentation.targetContext
+        listenerWasEnabled = PrivacyConsent.hasNotificationAccess(context)
+        permissionSetupStarted = true
+        if (!listenerWasEnabled) TestNotificationAccess.setEnabled(true)
+        assertTrue("테스트 앱의 정확한 알림 리스너 접근 권한이 필요합니다.", PrivacyConsent.hasNotificationAccess(context))
+        instrumentation.runOnMainSync {
+            assertTrue("테스트 설치의 알림 고지 동의를 저장하지 못했습니다.", PrivacyConsent.getInstance(context).acceptDisclosure())
+        }
+        assertTrue("동의와 시스템 권한을 모두 허용한 테스트 상태여야 합니다.", PrivacyConsent.canProcessNotifications(context))
+
         val automation = instrumentation.uiAutomation
         val info = automation.serviceInfo
         originalAccessibilityFlags = info.flags
         info.flags = info.flags or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
         automation.serviceInfo = info
+        accessibilityConfigured = true
     }
 
     @After fun tearDown() {
-        scenario?.close()
-        instrumentation.runOnMainSync { NotificationRepository.removeNotification(testKey) }
-        val automation = instrumentation.uiAutomation
-        automation.serviceInfo = automation.serviceInfo.apply { flags = originalAccessibilityFlags }
+        try {
+            scenario?.close()
+        } finally {
+            try {
+                instrumentation.runOnMainSync {
+                    // Slivue 메모리만 비운다. 다른 앱의 원본 알림 해제는 수행하지 않는다.
+                    PrivacyConsent.getInstance(instrumentation.targetContext).revokeDisclosure()
+                    NotificationRepository.clearMemoryOnly()
+                }
+            } finally {
+                try {
+                    if (permissionSetupStarted && !listenerWasEnabled) TestNotificationAccess.setEnabled(false)
+                } finally {
+                    if (accessibilityConfigured) {
+                        val automation = instrumentation.uiAutomation
+                        automation.serviceInfo = automation.serviceInfo.apply { flags = originalAccessibilityFlags }
+                    }
+                }
+            }
+        }
     }
 
     @Test fun panelFillsTheVisibleSafeAreaAndKeepsItsHeaderOnOneLine() {

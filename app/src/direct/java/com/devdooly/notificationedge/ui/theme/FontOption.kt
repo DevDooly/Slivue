@@ -1,5 +1,7 @@
 package com.devdooly.notificationedge.ui.theme
 
+// Google Fonts 제공자는 직접 배포판에만 포함한다.
+
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.font.FontFamily

@@ -8,6 +8,7 @@ import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.ui.overlay.EdgePanelLauncher
 import com.devdooly.notificationedge.ui.settings.SettingsActivity
 import com.devdooly.notificationedge.ui.shortcuts.PanelShortcuts
+import com.devdooly.notificationedge.util.PrivacyConsent
 
 /**
  * 런처 아이콘 / Good Lock / 제스처 실행 시 엣지 패널을 즉시 토글하거나 설정창으로 분기하는 트램펄린 액티비티
@@ -21,7 +22,8 @@ class MainActivity : Activity() {
         val settingsRepository = SettingsRepository.getInstance(applicationContext)
         val openSettings = intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)
 
-        if (!openSettings && Settings.canDrawOverlays(this) && settingsRepository.isLaunchDirectToPanelSync()) {
+        if (!openSettings && PrivacyConsent.canProcessNotifications(this) &&
+            Settings.canDrawOverlays(this) && settingsRepository.isLaunchDirectToPanelSync()) {
             EdgePanelLauncher.toggle(this)
         } else {
             val settingsIntent = Intent(this, SettingsActivity::class.java).apply {

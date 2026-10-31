@@ -18,10 +18,6 @@
     <!-- Auto start after reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     
-    <!-- Internet for checking & downloading GitHub Releases update -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-
     <!-- 활성 미디어 세션의 앱이 PiP를 선언했는지 확인한다. 전체 패키지 조회 권한은 요청하지 않는다. -->
     <queries>
         <intent>
@@ -43,14 +39,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationEdge"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="34">
+        tools:targetApi="36">
         
         <!-- 런처 메인 엔트리 포인트 (완전 투명 트램펄린) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.NotificationEdge.TranslucentLauncher"
-            android:taskAffinity="com.devdooly.notificationedge.launcher"
+            android:taskAffinity="${applicationId}.launcher"
             android:launchMode="singleInstance"
             android:noHistory="true"
             android:excludeFromRecents="true">
@@ -65,7 +61,7 @@
             android:name=".ui.settings.SettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.NotificationEdge"
-            android:taskAffinity="com.devdooly.notificationedge.settings"
+            android:taskAffinity="${applicationId}.settings"
             android:launchMode="singleTask"
             android:noHistory="false"
             android:excludeFromRecents="false" />
@@ -76,7 +72,7 @@
             android:exported="false"
             android:theme="@style/Theme.NotificationEdge.TranslucentPanel"
             android:windowSoftInputMode="adjustResize"
-            android:taskAffinity="com.devdooly.notificationedge.overlay"
+            android:taskAffinity="${applicationId}.overlay"
             android:launchMode="singleInstance"
             android:noHistory="true"
             android:excludeFromRecents="true" />
@@ -87,7 +83,7 @@
             android:exported="true"
             android:label="@string/open_panel_activity_label"
             android:theme="@style/Theme.NotificationEdge.TranslucentLauncher"
-            android:taskAffinity="com.devdooly.notificationedge.openpanel"
+            android:taskAffinity="${applicationId}.openpanel"
             android:launchMode="standard"
             android:noHistory="true"
             android:excludeFromRecents="true">
@@ -137,7 +133,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Overlay Edge Panel for Notifications" />
+                android:value="User-enabled edge notification handle and edge-lighting overlay while using other apps. The visible foreground notification opens settings and provides a Stop Slivue action. Processing requires explicit in-app consent and notification access." />
         </service>
 
         <receiver
@@ -149,16 +145,10 @@
             </intent-filter>
         </receiver>
 
-        <!-- FileProvider for APK In-App Update Installation -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+        <activity
+            android:name=".ui.settings.PrivacyPolicyActivity"
             android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
+            android:theme="@style/Theme.NotificationEdge" />
 
     </application>
 

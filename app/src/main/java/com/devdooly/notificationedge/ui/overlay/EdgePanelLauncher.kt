@@ -5,6 +5,8 @@ import android.content.Intent
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.util.MediaControlHelper
 import com.devdooly.notificationedge.util.AppLog
+import com.devdooly.notificationedge.util.PrivacyConsent
+import com.devdooly.notificationedge.ui.settings.SettingsActivity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +19,12 @@ object EdgePanelLauncher {
     private val gate = PanelLaunchGate(scope)
 
     fun open(context: Context) {
+        if (!PrivacyConsent.canProcessNotifications(context)) {
+            context.startActivity(Intent(context, SettingsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+            })
+            return
+        }
         if (EdgePanelActivity.isInstanceActive) return
         // 진입용 무화면 Activity는 바로 종료하므로 Application만 보관한다.
         val appContext = context.applicationContext
@@ -32,7 +40,7 @@ object EdgePanelLauncher {
                 }
             },
             launch = {
-                if (!EdgePanelActivity.isInstanceActive) {
+                if (PrivacyConsent.canProcessNotifications(appContext) && !EdgePanelActivity.isInstanceActive) {
                     try {
                         appContext.startActivity(createIntent(appContext))
                     } catch (error: Exception) {

@@ -2,6 +2,7 @@ package com.devdooly.notificationedge.ui.settings
 
 import android.app.Application
 import android.content.Intent
+import android.content.ComponentName
 import android.net.Uri
 import android.os.Looper
 import android.provider.Settings
@@ -10,6 +11,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.devdooly.notificationedge.data.model.AppSettings
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.service.EdgeOverlayService
+import com.devdooly.notificationedge.service.NotificationListener
+import com.devdooly.notificationedge.util.PrivacyConsent
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -90,6 +93,8 @@ class SettingsActivityTest {
         assertNull(shadowOf(application).nextStartedService)
         controller.pause().stop()
         ShadowSettings.setCanDrawOverlays(true)
+        Settings.Secure.putString(application.contentResolver, "enabled_notification_listeners", ComponentName(application, NotificationListener::class.java).flattenToString())
+        assertTrue(PrivacyConsent.getInstance(application).acceptDisclosure())
 
         controller.restart().start().resume()
         drainMainLooper()
@@ -151,6 +156,8 @@ class SettingsActivityTest {
         savedSettings.value = AppSettings(isServiceEnabled = false, isEdgeLightingEnabled = false)
         controller.pause().stop()
         ShadowSettings.setCanDrawOverlays(true)
+        Settings.Secure.putString(application.contentResolver, "enabled_notification_listeners", ComponentName(application, NotificationListener::class.java).flattenToString())
+        assertTrue(PrivacyConsent.getInstance(application).acceptDisclosure())
 
         controller.restart().start().resume()
         drainMainLooper()

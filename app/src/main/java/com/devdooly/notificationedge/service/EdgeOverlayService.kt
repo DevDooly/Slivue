@@ -35,6 +35,7 @@ import com.devdooly.notificationedge.ui.overlay.EdgePanelActivity
 import com.devdooly.notificationedge.ui.overlay.EdgePanelLauncher
 import com.devdooly.notificationedge.util.AppLog
 import com.devdooly.notificationedge.util.OverlayLifecycleOwner
+import com.devdooly.notificationedge.util.PrivacyConsent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -68,11 +69,26 @@ class EdgeOverlayService : Service() {
         settingsRepository = SettingsRepository.getInstance(applicationContext)
 
         startForegroundNotification()
+        if (!PrivacyConsent.canProcessNotifications(this)) {
+            stopSelf()
+            return
+        }
+        observePrivacyConsent()
         observeSettings()
         observeNewNotifications()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP_SERVICE) {
+            PrivacyConsent.getInstance(this).pauseProcessing()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        if (!PrivacyConsent.canProcessNotifications(this)) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         when (intent?.action) {
             ACTION_OPEN_PANEL -> {
                 triggerHaptic()
@@ -93,19 +109,25 @@ class EdgeOverlayService : Service() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        if (!PrivacyConsent.canProcessNotifications(this)) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return
+        }
         // 실행 중 언어 변경에도 알림과 기존 채널의 표시 이름을 갱신한다.
         startForegroundNotification()
     }
 
     private fun startForegroundNotification() {
-        val channelId = "notification_edge_service_channel"
+        // 이전 MIN 중요도 채널은 생성 후 앱에서 올릴 수 없으므로 명시적인 LOW 채널로 이행한다.
+        val channelId = "notification_edge_service_channel_v2"
         val channelName = getString(R.string.overlay_service_channel_name)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
                 channelName,
-                NotificationManager.IMPORTANCE_MIN
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = getString(R.string.overlay_service_channel_description)
                 setShowBadge(false)
@@ -117,8 +139,15 @@ class EdgeOverlayService : Service() {
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_IMMUTABLE
+            Intent(this, MainActivity::class.java).putExtra(MainActivity.EXTRA_OPEN_SETTINGS, true),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val stopIntent = PendingIntent.getService(
+            this,
+            1,
+            Intent(this, EdgeOverlayService::class.java).setAction(ACTION_STOP_SERVICE),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
@@ -127,7 +156,8 @@ class EdgeOverlayService : Service() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .addAction(0, getString(R.string.overlay_service_stop), stopIntent)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
@@ -136,6 +166,11 @@ class EdgeOverlayService : Service() {
     private fun observeSettings() {
         serviceScope.launch {
             settingsRepository.settingsFlow.collectLatest { settings ->
+                if (!PrivacyConsent.canProcessNotifications(this@EdgeOverlayService)) {
+                    removeHandleView()
+                    stopSelf()
+                    return@collectLatest
+                }
                 currentSettingsState.value = settings
                 if (settings.isServiceEnabled) {
                     updateHandleView()
@@ -154,12 +189,26 @@ class EdgeOverlayService : Service() {
     private fun observeNewNotifications() {
         serviceScope.launch {
             NotificationRepository.newNotificationEvent.collect { notification ->
+                if (!PrivacyConsent.canProcessNotifications(this@EdgeOverlayService)) return@collect
                 // 엣지 핸들(마스터 스위치) 활성화 여부와 무관하게, 엣지 라이팅 설정이 켜져 있으면 라이팅 발동
                 if (currentSettings.isEdgeLightingEnabled) {
                     if (!currentSettings.excludedPackages.contains(notification.packageName)) {
                         triggerHaptic()
                         showEdgeLighting()
                     }
+                }
+            }
+        }
+    }
+
+    private fun observePrivacyConsent() {
+        serviceScope.launch {
+            PrivacyConsent.getInstance(this@EdgeOverlayService).state.collect { state ->
+                if (!state.isProcessingEnabled) {
+                    removeHandleView()
+                    removeEdgeLighting()
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
                 }
             }
         }
@@ -398,5 +447,6 @@ class EdgeOverlayService : Service() {
         const val ACTION_OPEN_PANEL = "com.devdooly.notificationedge.ACTION_OPEN_PANEL"
         const val ACTION_CLOSE_PANEL = "com.devdooly.notificationedge.ACTION_CLOSE_PANEL"
         const val ACTION_TOGGLE_PANEL = "com.devdooly.notificationedge.ACTION_TOGGLE_PANEL"
+        const val ACTION_STOP_SERVICE = "com.devdooly.notificationedge.ACTION_STOP_SERVICE"
     }
 }

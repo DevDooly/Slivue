@@ -11,6 +11,7 @@ import com.devdooly.notificationedge.data.model.AppSettings
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.ui.settings.SettingsActivity
 import com.devdooly.notificationedge.ui.theme.NotificationEdgeTheme
+import com.devdooly.notificationedge.util.PrivacyConsent
 
 /**
  * 안드로이드 시스템 네비게이션 뒤로가기(하단 네비바 버튼, 양쪽 화면 제스처)를
@@ -21,6 +22,11 @@ class EdgePanelActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!PrivacyConsent.canProcessNotifications(this)) {
+            startActivity(Intent(this, SettingsActivity::class.java))
+            closeAndFinish()
+            return
+        }
         configureTransparentPanelWindow(window)
 
         // OS 레벨의 뒤로가기 콜백 등록 (100% 보장)
@@ -60,6 +66,10 @@ class EdgePanelActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (!PrivacyConsent.canProcessNotifications(this)) {
+            closeAndFinish()
+            return
+        }
         activeInstance = this
         isInstanceActive = true
     }

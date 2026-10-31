@@ -132,9 +132,12 @@ Samsung Galaxy에서는 핸들을 숨기고 One Hand Operation + 제스처만 �
 
 Google Play 소개를 **한국어·영어**로 준비했습니다. 실제 스토어 출시는 아직 진행하지 않았으며, 현재 GitHub APK가 그대로 Play 제출 가능한 빌드라는 뜻은 아닙니다.
 
+v1.3.27부터 `direct`·`play` 빌드를 분리합니다. Play판은 **`com.devdooly.slivue`**라는 새 앱이며, 기존 GitHub판과 별도 설치됩니다. Play판에서는 자체 APK 업데이트·인터넷 권한·외부 다운로드 폰트·진단 원문 내보내기·클라우드/D2D 백업을 제외합니다. 위 개인정보 구현 설명은 GitHub판 기준이며, Play 정책 초안과 혼동하지 마세요. 두 판 모두 알림 접근 전에 앱 내부 고지에 동의해야 하고, 전체 서비스 중지·동의 철회로 처리를 멈출 수 있습니다.
+
 - [한·영 스토어 소개 미리보기 HTML](docs/google-play/index.html): GitHub에서는 HTML 소스로 보입니다. 저장소를 내려받아 브라우저에서 열면 언어 전환과 문구 복사를 사용할 수 있습니다.
 - [한국어 등록정보 원문](docs/google-play/listings/ko-KR/) · [영어 등록정보 원문](docs/google-play/listings/en-US/): Play Console에 입력할 앱 이름·짧은 설명·상세 설명입니다.
 - [등록정보 적용·수정 안내](docs/GOOGLE_PLAY_LISTING_GUIDE.md): 언어 추가 순서와 글자 수 검증, 출시 전 남은 사항을 정리했습니다.
+- [Play 제출 준비·심사 점검표](docs/GOOGLE_PLAY_SUBMISSION_CHECKLIST.md): 실제 공개 연락처·정책 URL·업로드 키 등 제출 전 남은 결정과 명령을 확인하세요.
 
 ## 동작 구조
 
@@ -157,17 +160,17 @@ flowchart LR
 
 | 항목 | 기준 |
 | --- | --- |
-| 언어 | Kotlin 2.0.21 |
+| 언어 | Kotlin 2.3.10 |
 | 사용자 인터페이스 | Jetpack Compose · Material 3 |
 | 최소 안드로이드 | Android 8.0 · API 26 |
-| 컴파일·대상 SDK | API 34 |
+| 컴파일·대상 SDK | API 36 |
 | 자바 | JDK 17 |
 | 상태·설정 | Kotlin Coroutines · Flow · DataStore |
 | 테스트 | JUnit · MockK · Turbine · Robolectric · Compose UI Test |
 
 ### 로컬 빌드
 
-Android SDK 34와 JDK 17을 준비한 뒤 저장소 루트에서 실행합니다.
+Android SDK 36과 JDK 17을 준비한 뒤 저장소 루트에서 실행합니다. AGP 8.13.2와 Gradle 8.14를 사용하며 표준 검증 명령은 두 배포 변형을 확인합니다.
 
 ```powershell
 .\gradlew.bat testDebugUnitTest compileDebugKotlin assembleDebug lintRelease

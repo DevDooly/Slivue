@@ -30,10 +30,12 @@ internal fun PermissionStatusCard(
     hasBatteryOpt: Boolean,
     onGrantOverlay: () -> Unit,
     onGrantNotification: () -> Unit,
-    onGrantBattery: () -> Unit
+    onGrantBattery: () -> Unit,
+    hasPostNotification: Boolean = true,
+    onGrantPostNotification: () -> Unit = {},
 ) {
     val allRequiredGranted = hasOverlay && hasNotification
-    val allGranted = hasOverlay && hasNotification && hasBatteryOpt
+    val allGranted = hasOverlay && hasNotification && hasBatteryOpt && hasPostNotification
     var isExpanded by rememberSaveable(allRequiredGranted) { mutableStateOf(!allRequiredGranted) }
     val stateLabel = stringResource(if (isExpanded) R.string.settings_collapse else R.string.settings_expand)
 
@@ -128,6 +130,13 @@ internal fun PermissionStatusCard(
                         desc = stringResource(R.string.settings_battery_permission_description),
                         isGranted = hasBatteryOpt,
                         onClick = onGrantBattery
+                    )
+                    HorizontalDivider(color = GlassBorder, modifier = Modifier.padding(vertical = 8.dp))
+                    PermissionItem(
+                        title = stringResource(R.string.privacy_post_title),
+                        desc = stringResource(R.string.privacy_post_description),
+                        isGranted = hasPostNotification,
+                        onClick = onGrantPostNotification,
                     )
                 }
             }

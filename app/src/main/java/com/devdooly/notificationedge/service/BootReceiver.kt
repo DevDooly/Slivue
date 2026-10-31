@@ -6,6 +6,7 @@ import android.content.Intent
 import android.provider.Settings
 import com.devdooly.notificationedge.data.repository.SettingsRepository
 import com.devdooly.notificationedge.util.AppLog
+import com.devdooly.notificationedge.util.PrivacyConsent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -16,6 +17,7 @@ class BootReceiver : BroadcastReceiver {
     constructor() : super()
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (!PrivacyConsent.canProcessNotifications(context)) return
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             // 오버레이 권한이 허용되어 있는지 확인
             if (Settings.canDrawOverlays(context)) {

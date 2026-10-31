@@ -118,7 +118,7 @@ class LocalizationUiTest {
             "Version ${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE}) | " +
                 "Target SDK ${composeRule.activity.applicationInfo.targetSdkVersion}"
         ).assertIsDisplayed()
-        composeRule.onNodeWithText("Package: com.devdooly.notificationedge").assertIsDisplayed()
+        composeRule.onNodeWithText("Package: ${BuildConfig.APPLICATION_ID}").assertIsDisplayed()
     }
 
     @Test
@@ -132,7 +132,7 @@ class LocalizationUiTest {
             "버전 ${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE}) | " +
                 "Target SDK ${composeRule.activity.applicationInfo.targetSdkVersion}"
         ).assertIsDisplayed()
-        composeRule.onNodeWithText("패키지: com.devdooly.notificationedge").assertIsDisplayed()
+        composeRule.onNodeWithText("패키지: ${BuildConfig.APPLICATION_ID}").assertIsDisplayed()
     }
 
     @Test

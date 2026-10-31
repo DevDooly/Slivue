@@ -1,0 +1,37 @@
+<resources>
+    <string name="overlay_service_stop">Stop Slivue</string>
+    <string name="privacy_title">Privacy and notification access</string>
+    <string name="privacy_disclosure_title">Before allowing notification access</string>
+    <string name="privacy_disclosure_data">Slivue reads app names, senders, notification titles and message text, timestamps and reply actions, including while this screen is closed. Notifications can contain private or sensitive information.</string>
+    <string name="privacy_disclosure_purpose">This access is used to display and filter notifications in the edge panel and send replies you choose to write. Quick replies go to the original messaging app, which handles delivery. The optional pause-video setting also accesses active media sessions.</string>
+    <string name="privacy_disclosure_play">The Play build processes notifications on your device. It has no Internet permission, advertising or analytics SDK, cloud backup, downloaded font provider or APK self-updater. Imported fonts and settings stay in app storage.</string>
+    <string name="privacy_disclosure_direct">The GitHub build processes notifications on your device. Quick replies are passed to the original app; selected fonts and update checks can use the Internet. Settings may be restored by Android backup. Diagnostic output is optional and may contain private text.</string>
+    <string name="privacy_disclosure_control">You can choose Later without granting access. Stop Slivue pauses notification processing, clears its in-memory history and removes the overlays. Withdraw consent also stops processing; you can separately revoke Android notification access in system settings.</string>
+    <string name="privacy_accept">Agree and open settings</string>
+    <string name="privacy_later">Later</string>
+    <string name="privacy_save_failed">Could not save your choice. Notification access settings were not opened. Please try again.</string>
+    <string name="privacy_policy_open">Read privacy information</string>
+    <string name="privacy_policy_public">Open published privacy policy</string>
+    <string name="privacy_policy_title">Privacy policy</string>
+    <string name="privacy_processing_active">Consent saved. Notification processing is enabled when Android notification access is allowed.</string>
+    <string name="privacy_processing_paused">Slivue is stopped. Notification processing and overlays are paused.</string>
+    <string name="privacy_processing_not_consented">Notification content is not processed until you agree to the disclosure and allow Android notification access.</string>
+    <string name="privacy_resume">Resume Slivue</string>
+    <string name="privacy_revoke">Withdraw consent and stop</string>
+    <string name="privacy_clear_history">Clear Slivue notification history</string>
+    <string name="privacy_clear_history_done">Slivue history cleared. Original apps’ notifications were not removed.</string>
+    <string name="privacy_delete_data">Manage or delete app data</string>
+    <string name="privacy_delete_description">Use Android app storage settings to delete saved filters, detected apps, fonts and preferences. This resets Slivue; it does not delete messages in other apps.</string>
+    <string name="privacy_open_failed">No app is available to open this link.</string>
+    <string name="privacy_back">Back</string>
+    <string name="privacy_asset_error">Privacy information could not be loaded. Please do not grant notification access until you can review it.</string>
+    <string name="privacy_post_title">Service status notifications (optional)</string>
+    <string name="privacy_post_description">Allow notifications to see Slivue’s running status and Stop action. This does not grant access to other apps’ notifications.</string>
+    <string name="privacy_review">Review notification access</string>
+    <string name="play_preparation_title">Play preparation build — not ready for submission</string>
+    <string name="play_preparation_description">The public developer contact, finalized privacy policy, upload key and Play Console review are not complete. This build is for local verification only.</string>
+    <string name="play_updates_title">Google Play updates</string>
+    <string name="play_updates_description">This build does not download or install APK updates. Updates are distributed by Google Play after the app is published.</string>
+    <string name="play_current_version">Current version: %1$s</string>
+    <string name="play_open_store">Open Google Play</string>
+</resources>

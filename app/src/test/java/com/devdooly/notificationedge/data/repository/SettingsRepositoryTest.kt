@@ -3,6 +3,7 @@ package com.devdooly.notificationedge.data.repository
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.devdooly.notificationedge.BuildConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.flow.first
@@ -14,7 +15,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
-@Config(manifest = Config.NONE)
+@Config(sdk = [26, 34], manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsRepositoryTest {
 
@@ -58,7 +59,8 @@ class SettingsRepositoryTest {
         assertFalse(repository.isDiagnosticModeEnabledSync())
 
         repository.updateDiagnosticModeEnabled(true)
-        assertTrue(repository.isDiagnosticModeEnabledSync())
+        if (BuildConfig.IS_PLAY_DISTRIBUTION) assertFalse(repository.isDiagnosticModeEnabledSync())
+        else assertTrue(repository.isDiagnosticModeEnabledSync())
 
         repository.updateDiagnosticModeEnabled(false)
         assertFalse(repository.isDiagnosticModeEnabledSync())
@@ -71,6 +73,14 @@ class SettingsRepositoryTest {
         assertTrue(SettingsRepository.isDiagnosticSessionActive(true, now + 1L, now))
         assertFalse(SettingsRepository.isDiagnosticSessionActive(true, now, now))
         assertFalse(SettingsRepository.isDiagnosticSessionActive(false, now + 1L, now))
+    }
+
+    @Test
+    fun `Play 배포에서는 진단 원문 수집을 설정으로 활성화할 수 없다`() = runTest {
+        if (!BuildConfig.IS_PLAY_DISTRIBUTION) return@runTest
+        repository.updateDiagnosticModeEnabled(true)
+        assertFalse(repository.isDiagnosticModeEnabledSync())
+        assertFalse(repository.settingsFlow.first().diagnosticModeEnabled)
     }
 
     @Test
