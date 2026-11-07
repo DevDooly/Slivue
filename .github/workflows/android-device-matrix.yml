@@ -52,6 +52,24 @@ jobs:
       - name: Run Managed Device Test
         run: ./gradlew "${{ matrix.task }}" --no-daemon
 
+      - name: Collect Managed Device Diagnostics
+        if: always()
+        run: bash scripts/collect-ci-device-diagnostics.sh "${{ matrix.api-level }}" after
+
+      - name: Preserve Managed Device Reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-device-api-${{ matrix.api-level }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+            app/build/outputs/managed_device_android_test_additional_output/
+            app/build/outputs/connected_android_test_additional_output/
+            app/build/ci-device-diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
+
   legacy-api-26-test:
     name: API 26 계측 테스트
     runs-on: ubuntu-latest
@@ -116,8 +134,30 @@ jobs:
           "$ADB" shell settings put global transition_animation_scale 0
           "$ADB" shell settings put global animator_duration_scale 0
 
+      - name: Read API 26 WebView and IME Environment
+        run: bash scripts/collect-ci-device-diagnostics.sh 26 startup
+
       - name: Run API 26 Test
         run: ./gradlew connectedDirectDebugAndroidTest --no-daemon
+
+      - name: Collect API 26 Diagnostics
+        if: always()
+        run: bash scripts/collect-ci-device-diagnostics.sh 26 after
+
+      - name: Preserve API 26 Reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-device-api-26-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+            app/build/outputs/managed_device_android_test_additional_output/
+            app/build/outputs/connected_android_test_additional_output/
+            app/build/ci-device-diagnostics/
+            ${{ runner.temp }}/emulator-api26.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Stop API 26 Emulator
         if: always()

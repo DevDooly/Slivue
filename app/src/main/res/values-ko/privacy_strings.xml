@@ -25,6 +25,9 @@
     <string name="privacy_open_failed">이 링크를 열 수 있는 앱이 없습니다.</string>
     <string name="privacy_back">뒤로</string>
     <string name="privacy_asset_error">개인정보 안내를 불러오지 못했습니다. 안내를 확인하기 전에는 알림 접근을 허용하지 마세요.</string>
+    <string name="privacy_native_reader">WebView를 사용할 수 없어 같은 로컬 개인정보 안내를 기본 읽기 화면으로 표시합니다.</string>
+    <string name="privacy_language_korean">한국어</string>
+    <string name="privacy_language_english">English</string>
     <string name="privacy_post_title">서비스 상태 알림 보내기 (선택)</string>
     <string name="privacy_post_description">Slivue 실행 상태와 중지 버튼을 알림으로 확인합니다. 다른 앱의 알림을 읽는 권한과는 별개입니다.</string>
     <string name="privacy_review">알림 접근 안내 확인</string>

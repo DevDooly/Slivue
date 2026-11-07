@@ -25,6 +25,9 @@
     <string name="privacy_open_failed">No app is available to open this link.</string>
     <string name="privacy_back">Back</string>
     <string name="privacy_asset_error">Privacy information could not be loaded. Please do not grant notification access until you can review it.</string>
+    <string name="privacy_native_reader">WebView is unavailable. The same local privacy information is shown in the basic reader.</string>
+    <string name="privacy_language_korean">Korean</string>
+    <string name="privacy_language_english">English</string>
     <string name="privacy_post_title">Service status notifications (optional)</string>
     <string name="privacy_post_description">Allow notifications to see Slivue’s running status and Stop action. This does not grant access to other apps’ notifications.</string>
     <string name="privacy_review">Review notification access</string>

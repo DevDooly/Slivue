@@ -3,9 +3,13 @@ package com.devdooly.notificationedge
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.graphics.Rect
+import android.util.Log
 import android.view.accessibility.AccessibilityWindowInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -20,6 +24,7 @@ import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import java.io.FileInputStream
 
 @RunWith(AndroidJUnit4::class)
@@ -32,6 +37,7 @@ class PanelWindowInstrumentedTest {
     private var accessibilityConfigured = false
     private var listenerWasEnabled = false
     private var permissionSetupStarted = false
+    private var imeEnvironment: TestImeEnvironment? = null
 
     @Before fun observeSystemWindows() {
         val context = instrumentation.targetContext
@@ -66,9 +72,13 @@ class PanelWindowInstrumentedTest {
                 try {
                     if (permissionSetupStarted && !listenerWasEnabled) TestNotificationAccess.setEnabled(false)
                 } finally {
-                    if (accessibilityConfigured) {
-                        val automation = instrumentation.uiAutomation
-                        automation.serviceInfo = automation.serviceInfo.apply { flags = originalAccessibilityFlags }
+                    try {
+                        imeEnvironment?.restore()
+                    } finally {
+                        if (accessibilityConfigured) {
+                            val automation = instrumentation.uiAutomation
+                            automation.serviceInfo = automation.serviceInfo.apply { flags = originalAccessibilityFlags }
+                        }
                     }
                 }
             }
@@ -98,6 +108,8 @@ class PanelWindowInstrumentedTest {
     }
 
     @Test fun syntheticReplyCanOpenImeEnterTextAndHideImeWithoutClosingPanel() {
+        imeEnvironment = TestImeEnvironment()
+        imeEnvironment!!.prepare()
         instrumentation.runOnMainSync {
             // 전송 대상이 없는 합성 데이터만 사용한다. 실제 메시지 전송은 수행하지 않는다.
             NotificationRepository.addOrUpdateNotification(EdgeNotification(
@@ -107,15 +119,29 @@ class PanelWindowInstrumentedTest {
             ))
         }
         launchPanel()
+        // 의미 노드 클릭은 실제 터치와 달리 창 포커스가 생기기 전에도 실행될 수 있다.
+        // 사용자가 누를 수 있는 상태를 기다리며 앱의 키보드 표시 동작을 대신 수행하지 않는다.
+        waitForImeCondition("패널 창 포커스 준비") {
+            var ready = false
+            scenario!!.onActivity { activity ->
+                ready = activity.lifecycle.currentState == Lifecycle.State.RESUMED && activity.hasWindowFocus()
+            }
+            ready
+        }
         val context = instrumentation.targetContext
         composeRule.onNodeWithText(context.getString(R.string.panel_reply)).performScrollTo().performClick()
-        composeRule.waitUntil(10_000) { imeVisible() }
-        composeRule.onNode(hasSetTextAction()).assertIsDisplayed().performTextInput("Slivue keyboard test")
+        waitForImeCondition("답장 입력 포커스 취득") {
+            composeRule.onAllNodes(hasSetTextAction() and isFocused())
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).size == 1
+        }
+        waitForImeCondition("답장 소프트키보드 열기") { imeVisible() }
+        composeRule.onNode(hasSetTextAction()).assertIsDisplayed().assertIsFocused()
+            .performTextInput("Slivue keyboard test")
         composeRule.onNodeWithText("Slivue keyboard test").assertIsDisplayed()
         instrumentation.uiAutomation.executeShellCommand("input keyevent 4").use { descriptor ->
             FileInputStream(descriptor.fileDescriptor).use { it.readBytes() }
         }
-        composeRule.waitUntil(10_000) { !imeVisible() }
+        waitForImeCondition("시스템 뒤로가기로 소프트키보드 닫기") { !imeVisible() }
         scenario!!.onActivity { assertFalse(it.isFinishing) }
     }
 
@@ -126,5 +152,49 @@ class PanelWindowInstrumentedTest {
     private fun imeVisible(): Boolean {
         // 구형 OS의 크기가 조절된 투명 창에서는 호환 Insets 추정값 대신 실제 키보드 창을 확인한다.
         return instrumentation.uiAutomation.windows.any { it.type == AccessibilityWindowInfo.TYPE_INPUT_METHOD }
+    }
+
+    private fun waitForImeCondition(stage: String, condition: () -> Boolean) {
+        try {
+            composeRule.waitUntil(timeoutMillis = 10_000, condition = condition)
+        } catch (timeout: ComposeTimeoutException) {
+            val diagnostic = imeDiagnostic(stage)
+            Log.e("SlivueImeRegression", diagnostic)
+            // 텍스트·알림·화면 캡처 없이 상태 값만 기록한다. UTP가 제공한 추가 출력 위치를 우선한다.
+            runCatching {
+                val providedOutput = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
+                val output = if (providedOutput.isNullOrBlank()) {
+                    File(instrumentation.targetContext.cacheDir, "ci-diagnostics")
+                } else File(providedOutput)
+                if (output.isDirectory || output.mkdirs()) {
+                    File(output, "slivue-ime-regression.txt").writeText(diagnostic, Charsets.UTF_8)
+                }
+            }
+            throw AssertionError("$stage: 실제 상태가 10초 안에 충족되지 않았습니다. $diagnostic", timeout)
+        }
+    }
+
+    private fun imeDiagnostic(stage: String): String {
+        val ownActivity = runCatching {
+            var summary = "activityUnavailable"
+            scenario?.onActivity { activity ->
+                val decor = activity.window.decorView
+                val insets = ViewCompat.getRootWindowInsets(decor)
+                summary = "lifecycle=${activity.lifecycle.currentState}, finishing=${activity.isFinishing}, " +
+                    "windowFocus=${activity.hasWindowFocus()}, rootFocus=${decor.hasFocus()}, " +
+                    "focusedView=${activity.currentFocus?.javaClass?.simpleName}, " +
+                    "imeInsetsVisible=${insets?.isVisible(WindowInsetsCompat.Type.ime())}, " +
+                    "windowFlags=${activity.window.attributes.flags}, softInputMode=${activity.window.attributes.softInputMode}"
+            }
+            summary
+        }.getOrElse { "activityUnavailable=${it.javaClass.simpleName}" }
+        val windows = runCatching {
+            instrumentation.uiAutomation.windows.joinToString(prefix = "[", postfix = "]") {
+                "type=${it.type}/active=${it.isActive}/focused=${it.isFocused}"
+            }
+        }.getOrElse { "unavailable=${it.javaClass.simpleName}" }
+        val environment = runCatching { imeEnvironment?.diagnosticSummary() }
+            .getOrElse { "environmentUnavailable=${it.javaClass.simpleName}" }
+        return "stage=$stage; $environment; $ownActivity; accessibilityWindows=$windows"
     }
 }

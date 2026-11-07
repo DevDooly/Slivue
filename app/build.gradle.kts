@@ -103,8 +103,8 @@ android {
         applicationId = "com.devdooly.notificationedge"
         minSdk = 26
         targetSdk = 36
-        versionCode = 157
-        versionName = "1.3.27"
+        versionCode = 158
+        versionName = "1.3.28"
 
         buildConfigField("String", "PRIVACY_POLICY_URL", javaString(playPrivacyPolicyUrl))
         buildConfigField("String", "SUPPORT_EMAIL", javaString(playSupportEmail))
