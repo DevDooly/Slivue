@@ -1,5 +1,17 @@
 # Slivue 서명·공개 소스·수익화 전략
 
+## 2026-11-23 현재 실행 경계
+
+- 공개 표시 이름 `DevDooly`, 지원·개인정보 문의 `vmdooly@gmail.com` 확정. 기존 계정 종료는 사용자 확인상 휴면·장기 미사용이며, 신규 Play Console 계정 생성·본인인증 완료도 사용자 확인이다. 앱·서명 등록 화면을 자동 확인한 것은 아니다.
+- Play의 새 패키지는 `com.devdooly.slivue`다. 기존 GitHub판과 별도 설치이므로 아래의 같은 패키지 서명 이관·교차 설치 표는 2026-09-05 당시 대안으로 보존하며 이번 Play 준비에 적용하지 않는다.
+- **독립 Play 업로드 키의 로컬 생성·개인키 검증을 완료**했다. 개인 저장 파일은 `app/keystore/slivue-play-upload.jks`, 공개 인증서 PEM은 `app/build/play-upload-key/slivue-play-upload-cert.pem`이다. Windows 사용자에 묶인 DPAPI 보호와 소유자/SYSTEM 접근 제한, Git 제외를 확인했다. 키 파일·암호·암호 보호 파일 원문은 공개 문서·저장소에 넣지 않는다.
+- 업로드 인증서 공개 SHA-256: `0c18975a335f473742ec82dac3b09c17f1715a3deb99a0acacf06f23769707da`. 이는 개인키가 아니며 기존 직접 배포 인증서와 별개다. **이동 가능한 오프라인 백업·복구 시험, Console 인증서 등록, 서명된 Play AAB 생성은 아직 완료하지 않았다.** 같은 Windows 사용자에 묶인 보호 파일을 복사한 것만으로 이식 가능한 복구가 된다고 가정하지 않는다.
+- 로컬 키 생성, 업로드 인증서의 Console 등록, Google이 배포 APK에 사용하는 앱 서명키 선택·등록, AAB 업로드, 실제 Play 설치·다음 버전 업데이트는 각각 다른 단계다. 기존 legacy/direct 키를 Play 업로드 키로 재사용하지 않는다.
+- Slivue Play 정책의 GitHub Pages 공개와 한영 주소는 사용자 승인되었다. 실제 공개 URL 접근·최종 정책 내용/시행일 승인·제출 게이트는 별도이며 `draft`를 임의로 확정하지 않는다. 호스팅 승인만으로 `PLAY_POLICY_APPROVED=true`를 설정하지 않는다.
+- 약관·앱 서명 방식·결제·대상 국가·연령·심사/게시 결정은 소유자가 실제 Console에서 확인한다. [입력 가이드](PLAY_CONSOLE_ENTRY_GUIDE.md)와 [제출 점검표](GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)를 따른다.
+
+아래 2026-10-31 결정은 유지하며, 번호 본문·마지막 결정표의 2026-09-05 소스·“현재”·미생성 표현은 당시 기록이다. 최신 완료 상태는 위 실행 경계와 검증 증거를 우선한다.
+
 ## 2026-10-31 결정 — Play는 별도 신규 패키지
 
 사용자가 Play판만 `com.devdooly.slivue`, 직접 배포판은 기존 `com.devdooly.notificationedge` 유지로 결정했다. 따라서 아래의 기존 계보를 Play로 이관하는 검토는 **동일 패키지를 선택했을 때의 과거 대안**으로 보존한다. 이번 Play판에는 적용하지 않는다. 두 앱은 별도 설치이며 자동 설정·권한 이전이 없다.
@@ -77,7 +89,7 @@ Play 전용 업로드 키와 새 앱 서명은 별도 역할이다. 기존 노�
 
 ### 지금 private 전환을 권하지 않는 실무적 이유
 
-1. [현 업데이터](../app/src/main/java/com/devdooly/notificationedge/data/updater/AppUpdateManager.kt)는 인증 없는 `DevDooly/message_edge/releases/latest`와 공개 APK URL을 사용한다. private 전환 시 기존 설치 앱의 조회·다운로드가 중단될 것으로 판단된다. 이를 해결하려고 개인 액세스 토큰을 앱에 넣으면 안 된다. [GitHub Release API](https://docs.github.com/en/rest/releases/releases#get-the-latest-release)
+1. [직접 배포 업데이터](../app/src/direct/java/com/devdooly/notificationedge/data/updater/AppUpdateManager.kt)는 인증 없는 `DevDooly/message_edge/releases/latest`와 공개 APK URL을 사용한다. private 전환 시 기존 설치 앱의 조회·다운로드가 중단될 것으로 판단된다. 이를 해결하려고 개인 액세스 토큰을 앱에 넣으면 안 된다. [GitHub Release API](https://docs.github.com/en/rest/releases/releases#get-the-latest-release)
 2. 기존 공개 포크·다운로드본·노출키는 회수되지 않는다. private 전환은 노출 비밀 복구 대책이 아니다.
 3. 문서·개인정보처리방침을 같은 저장소의 Pages에 호스팅한다면 요금제·공개 접근 유지 조건도 확인해야 한다. [GitHub 공개 범위 변경](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility)
 
@@ -140,7 +152,7 @@ Slivue의 주 사용처는 엣지 패널이라 설정 화면 방문이 드물 �
 
 설정 화면 광고가 제품에 맞지 않으면 광고 제거·유료 테마 같은 대안도 검토할 수 있다. 이 경우에는 별도로 Play 결제 정책·가격 전환 제약·구매 복원·환불·사업/세무 요건을 조사하고 계획한다. 첫 출시 범위에는 넣지 않는다.
 
-## 7. 결정 기록
+## 7. 결정 기록 — 2026-09-05 당시 권고
 
 | 결정 | 이번 권고/상태 |
 | --- | --- |

@@ -76,7 +76,7 @@ jobs:
           test "v${VERSION_NAME}" = "$GITHUB_REF_NAME"
 
       - name: Run Tests and Build Release APK
-        run: ./gradlew testDirectDebugUnitTest compileDirectDebugKotlin assembleDirectDebugAndroidTest lintDirectRelease assembleDirectRelease assembleDirectMinifiedRelease --no-daemon
+        run: ./gradlew testDebugUnitTest compileDebugKotlin assembleDirectDebugAndroidTest lintRelease assembleRelease assembleDirectMinifiedRelease --no-daemon
 
       - name: Apply Rotated Signing Lineage
         run: |

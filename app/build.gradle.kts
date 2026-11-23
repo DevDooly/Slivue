@@ -46,9 +46,29 @@ val playUploadKeyAlias = releaseSigningValue("playUploadKeyAlias", "PLAY_UPLOAD_
 val playUploadKeyPassword = releaseSigningValue("playUploadKeyPassword", "PLAY_UPLOAD_KEY_PASSWORD")
 val playUploadSigningValues = listOf(playUploadStoreFile, playUploadStorePassword, playUploadKeyAlias, playUploadKeyPassword)
 val hasPlayUploadSigning = playUploadSigningValues.all { !it.isNullOrBlank() }
+
+// 추적 가능한 운영 정보만 읽는다. 업로드 개인키·비밀번호·정책 승인 상태는 이 파일에 두지 않는다.
+val playPublicMetadataFile = rootProject.file("config/play-public.properties")
+val playPublicMetadataKeys = setOf("playDeveloperName", "playSupportEmail", "playPrivacyPolicyUrl")
+val playPublicMetadata = Properties().apply {
+    if (playPublicMetadataFile.isFile) {
+        playPublicMetadataFile.reader(Charsets.UTF_8).use(::load)
+    }
+}
+require(playPublicMetadata.stringPropertyNames().all { it in playPublicMetadataKeys }) {
+    "config/play-public.properties에는 개발자 표시 이름·공개 문의 이메일·정책 URL만 작성할 수 있습니다. 비밀키와 승인 값은 로컬 비밀 설정으로 분리하세요."
+}
+
+// 명시적인 빈 CLI·환경 값도 보존해 공개 기본값으로 제출 조건을 잘못 채우지 않는다.
+fun resolvePlayMetadata(gradleValue: String?, environmentValue: String?, publicDefault: String?): String =
+    gradleValue ?: environmentValue ?: publicDefault.orEmpty()
+
 fun playMetadata(propertyName: String, environmentName: String): String =
-    providers.gradleProperty(propertyName).orNull
-        ?: providers.environmentVariable(environmentName).orNull.orEmpty()
+    resolvePlayMetadata(
+        providers.gradleProperty(propertyName).orNull,
+        providers.environmentVariable(environmentName).orNull,
+        playPublicMetadata.getProperty(propertyName)
+    )
 
 val playPrivacyPolicyUrl = playMetadata("playPrivacyPolicyUrl", "PLAY_PRIVACY_POLICY_URL")
 val playSupportEmail = playMetadata("playSupportEmail", "PLAY_SUPPORT_EMAIL")
@@ -103,8 +123,8 @@ android {
         applicationId = "com.devdooly.notificationedge"
         minSdk = 26
         targetSdk = 36
-        versionCode = 158
-        versionName = "1.3.28"
+        versionCode = 159
+        versionName = "1.3.29"
 
         buildConfigField("String", "PRIVACY_POLICY_URL", javaString(playPrivacyPolicyUrl))
         buildConfigField("String", "SUPPORT_EMAIL", javaString(playSupportEmail))
@@ -205,6 +225,34 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
+val verifyPlayPublicMetadata by tasks.registering {
+    group = "verification"
+    description = "공개 운영 정보 파일과 실제 메타데이터 우선순위·미승인 기본값을 검증합니다."
+    inputs.file(playPublicMetadataFile)
+    doLast {
+        check(playPublicMetadataFile.isFile) { "공개 Play 운영 정보 파일이 없습니다." }
+        check(playPublicMetadata.stringPropertyNames() == playPublicMetadataKeys) {
+            "공개 Play 운영 정보는 표시 이름·공개 문의 이메일·정책 URL 세 항목만 포함해야 합니다."
+        }
+        check(resolvePlayMetadata("명령", "환경", "공개") == "명령")
+        check(resolvePlayMetadata(null, "환경", "공개") == "환경")
+        check(resolvePlayMetadata(null, null, "공개") == "공개")
+        check(resolvePlayMetadata(null, null, null).isEmpty())
+        check(resolvePlayMetadata("", "환경", "공개").isEmpty())
+        check(resolvePlayMetadata(null, "", "공개").isEmpty())
+        check(playPublicMetadata.getProperty("playPolicyApproved") == null) {
+            "정책 승인 상태는 공개 파일의 기본값으로 지정하지 않습니다."
+        }
+        logger.lifecycle("공개 Play 운영 정보와 CLI > 환경 > 공개 기본값 우선순위를 확인했습니다. 정책 승인은 별도입니다.")
+    }
+}
+
+tasks.configureEach {
+    if (name in setOf("testDirectDebugUnitTest", "testPlayDebugUnitTest")) {
+        dependsOn(verifyPlayPublicMetadata)
     }
 }
 

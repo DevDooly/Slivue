@@ -8,6 +8,8 @@ on:
       - 'gradle/**'
       - '*.gradle.kts'
       - 'gradle.properties'
+      - 'config/play-public.properties'
+      - 'scripts/tests/play-public-metadata.test.mjs'
       - 'scripts/verify-play-artifact.mjs'
       - 'scripts/tests/verify-play-artifact.test.mjs'
       - '.github/workflows/play-candidate.yml'
@@ -17,6 +19,8 @@ on:
       - 'gradle/**'
       - '*.gradle.kts'
       - 'gradle.properties'
+      - 'config/play-public.properties'
+      - 'scripts/tests/play-public-metadata.test.mjs'
       - 'scripts/verify-play-artifact.mjs'
       - 'scripts/tests/verify-play-artifact.test.mjs'
       - '.github/workflows/play-candidate.yml'
@@ -49,7 +53,7 @@ jobs:
           chmod +x gradlew
           ./gradlew testPlayDebugUnitTest lintPlayRelease bundlePlayRelease --no-daemon
       - name: Play 산출물 검증 도구 회귀 검사
-        run: node --test scripts/tests/verify-play-artifact.test.mjs
+        run: node --test scripts/tests/verify-play-artifact.test.mjs scripts/tests/play-public-metadata.test.mjs
       - name: 실제 AAB 패키지·권한·DEX·16KB ELF 검사
         run: node scripts/verify-play-artifact.mjs app/build/outputs/bundle/playRelease/app-play-release.aab
       - name: 미서명 검증 후보만 보관

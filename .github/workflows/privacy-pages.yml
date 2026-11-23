@@ -1,0 +1,65 @@
+name: 개인정보 정책 사이트 검증·공개
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/privacy/**'
+      - 'app/src/play/assets/privacy/**'
+      - 'config/play-public.properties'
+      - 'scripts/build-privacy-site.mjs'
+      - 'scripts/tests/build-privacy-site.test.mjs'
+      - 'scripts/tests/play-public-metadata.test.mjs'
+      - 'scripts/verify-play-artifact.mjs'
+      - '.github/workflows/privacy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: privacy-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 정책 원본·공개 파일 검증
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: 소스 가져오기
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: 정책 사이트 회귀 검사
+        run: node --test scripts/tests/build-privacy-site.test.mjs scripts/tests/play-public-metadata.test.mjs
+      - name: 허용한 공개 파일만 생성
+        run: node scripts/build-privacy-site.mjs
+      - name: 승인된 Pages 설정 확인
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        with:
+          enablement: false
+      - name: 검증한 정책 사이트 첨부
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: app/build/privacy-site
+          retention-days: 1
+          include-hidden-files: false
+
+  deploy:
+    name: 승인된 정책 사이트 배포
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 정책 사이트 공개
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

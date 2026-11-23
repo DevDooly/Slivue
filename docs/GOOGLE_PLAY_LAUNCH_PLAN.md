@@ -1,5 +1,17 @@
 # Slivue Google Play 최초 출시 계획
 
+## 2026-11-23 현재 준비 상태
+
+아래 2026-09-05 진단과 2026-10-31 착수 기록은 당시 상태로 보존한다. 그 안의 “현재”·미정 연락처·target 34·동일 패키지 검토를 오늘의 상태로 읽지 않는다. 현재 기준 배포는 `play`의 `com.devdooly.slivue`와 기존 `direct`의 `com.devdooly.notificationedge`로 분리되어 있으며 compile/target SDK는 36이다.
+
+- 공개 개발자 표시 이름 **DevDooly**, 지원·개인정보 문의 **vmdooly@gmail.com**을 사용자가 확정했다. 이는 법적 신원이나 다른 앱 전체의 운영 정보를 대신하는 값이 아니다.
+- 기존 계정은 사용자 확인상 휴면·장기 미사용으로 종료되었다. Google의 [휴면 계정 안내](https://support.google.com/googleplay/android-developer/answer/11605267?hl=en)와 정책 제재를 구분한다. 신규 계정 생성·본인인증은 사용자 확인 완료이며, 계정 유형·생성일·등록비 기록·추가 요구는 실제 Console에서 확인한다.
+- 사용자가 Slivue Play 정책의 GitHub Pages 공개를 승인했다. 한국어 `https://devdooly.github.io/Slivue/privacy/ko.html`, 영어 `https://devdooly.github.io/Slivue/privacy/en.html`을 사용하되 실제 공개 접근 성공·정책 최종 내용 승인·시행일은 별도 검증한다. 내용 승인 전 정책 상태는 초안으로 유지한다.
+- 독립 업로드 키는 로컬 생성·개인키 검증을 완료했다. 이동 가능한 백업·Console 업로드 인증서/앱 서명 등록·서명 AAB는 아직 별도다. 실제 앱 생성·첫 AAB 업로드·FGS/Data safety 신고·심사·게시는 아직 확인하지 않았다.
+- 이번 정책 범위는 Slivue Play판뿐이다. Thumbbridge나 DevDooly의 다른 앱에 공통으로 적용하는 통합 방침을 만들지 않는다.
+
+다음 순서는 **정책 게시·접근 검증 → 운영자 최종 검토·시행일 → 업로드 키 백업·제출 게이트 → Console 앱·서명·콘텐츠 입력 → 내부/해당 비공개 테스트 → 심사**다. 가입·신분증·약관·결제는 소유자가 확인하며 이 계획으로 대신 동의하지 않는다. 실제 입력값과 화면 순서는 [Console 입력 가이드](PLAY_CONSOLE_ENTRY_GUIDE.md), 완료 증거는 [제출 점검표](GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)에서 관리한다.
+
 ## 2026-10-31 구현 착수와 결정
 
 최초 계획 아래의 2026-09-05 소스 진단은 당시 기록으로 보존한다. 현재 작업은 v1.3.27 후보에서 `direct`·`play` 분리, compile/target 36, Play 전용 `com.devdooly.slivue`, 자체 APK 설치/온라인 폰트/네트워크 권한/진단 내보내기 제외, 고지 동의·중지·철회 흐름을 구현·검증한다.
@@ -36,7 +48,7 @@ P0는 해결 또는 적격성 확인 전 제출하지 않는 항목, P1은 공�
 | --- | --- | --- |
 | P0 | [빌드 설정](../app/build.gradle.kts): compile/target 34, min 26, AGP 8.6.0 | SDK 36과 호환 도구 조합으로 이행, API 26~36 회귀 검증 |
 | P0 | [Manifest](../app/src/main/AndroidManifest.xml)에 `REQUEST_INSTALL_PACKAGES` 포함 | Play 최종 manifest에서 제거, 자체 설치 경로도 제외 |
-| P0 | [업데이터](../app/src/main/java/com/devdooly/notificationedge/data/updater/AppUpdateManager.kt)가 공개 GitHub에서 APK를 내려받아 설치 | Play용은 Play 업데이트만 사용. 버튼만 숨기는 방식은 불충분 |
+| P0 | [직접 배포 업데이터](../app/src/direct/java/com/devdooly/notificationedge/data/updater/AppUpdateManager.kt)가 공개 GitHub에서 APK를 내려받아 설치 | Play용은 Play 업데이트만 사용. 버튼만 숨기는 방식은 불충분 |
 | P0 | [CI](../.github/workflows/release.yml)는 APK 빌드·회전 서명·GitHub 게시 경로 | 별도 Play AAB 생성·검증 및 내부 테스트 경로 마련 |
 | P0 | [기존 서명 계보](SIGNING_KEY_ROTATION_RUNBOOK.md): 노출된 과거 키와 새 키가 API별로 사용됨 | Play 최초 등록에서 계보 수용 여부 확인 후 실제 Play 서명 APK로 교차 업데이트 시험 |
 | P0 | [권한 화면](../app/src/main/java/com/devdooly/notificationedge/ui/settings/SettingsScreen.kt)은 시스템 설정으로 바로 이동 | 알림 접근 전 명확한 앱 내부 설명·동의·거절 경로, 개인정보처리방침 링크 추가 |
@@ -45,7 +57,7 @@ P0는 해결 또는 적격성 확인 전 제출하지 않는 항목, P1은 공�
 | P1 | `POST_NOTIFICATIONS`는 선언되어 있으나 런타임 요청 경로를 찾지 못함 | 알림 접근 권한과 알림 보내기 권한을 구분해 안내·요청·거부 시험 |
 | P1 | [진단 기능](../app/src/main/java/com/devdooly/notificationedge/ui/settings/GeneralSettingsCards.kt)은 릴리스에도 노출 | 첫 Play 버전에서는 원문 진단 내보내기 제외 권고. 마스킹을 완전 익명화로 설명하지 않기 |
 | P1 | [백업 규칙](../app/src/main/res/xml/data_extraction_rules.xml)은 설정 파일 전체를 클라우드 백업하고 D2D 범위 미명시 | 발견 앱 목록·차단어·사용자 폰트·동의 상태의 저장/삭제/백업 정책 명시 |
-| P1 | [Google Fonts 제공자](../app/src/main/java/com/devdooly/notificationedge/ui/theme/FontOption.kt)를 통한 선택 서체 제공 | 외부 통신·제3자 처리·라이선스 확인. 첫 버전에서 시스템/사용자 서체만 유지하는 간소화도 검토 |
+| P1 | [직접 배포 Google Fonts 제공자](../app/src/direct/java/com/devdooly/notificationedge/ui/theme/FontOption.kt)를 통한 선택 서체 제공 | 외부 통신·제3자 처리·라이선스 확인. 첫 버전에서 시스템/사용자 서체만 유지하는 간소화도 검토 |
 | P1 | [기존 실기기 계획](ONE_UI_RELEASE_CHECKLIST.md)은 미완료 항목 존재 | One UI·Pixel, 권한 철회·재부팅·잠금·뒤로가기·배터리·접근성 확인 |
 | P1 | 라이선스는 Apache-2.0, 별도 의존성/자산 권리 대장 미구축 | 라이선스·NOTICE·아이콘·스크린샷·서체 출처 정리 |
 
