@@ -4,9 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="slivue-policy-status" content="draft">
+  <meta name="slivue-policy-status" content="final">
+  <meta name="slivue-policy-effective-date" content="2026-11-23">
   <meta name="color-scheme" content="light dark">
-  <title>Slivue Privacy Policy — Google Play Preparation Draft</title>
+  <title>Slivue Privacy Policy — Google Play</title>
   <style>
     :root { font-family: system-ui, sans-serif; line-height: 1.8; color: #182b44; background: #f5f7fb; }
     body { max-width: 850px; margin: auto; padding: 24px 20px 64px; overflow-wrap: anywhere; }
@@ -16,7 +17,7 @@
     a:focus-visible { outline: 3px solid #7755df; outline-offset: 4px; }
     h1 { line-height: 1.3; font-size: clamp(26px, 5vw, 38px); }
     h2 { margin-top: 36px; font-size: 21px; line-height: 1.5; }
-    .draft { padding: 20px; border: 2px solid #b97000; border-radius: 14px; background: #fff5df; color: #563300; }
+    .notice { padding: 20px; border: 1px solid #6b8db7; border-radius: 14px; }
     .meta { color: #506178; }
     dt { font-weight: 700; margin-top: 16px; }
     dd { margin: 4px 0 16px; }
@@ -25,7 +26,6 @@
     @media (prefers-color-scheme: dark) {
       :root { color: #e4ecf7; background: #0d192c; }
       a { color: #a9cfff; } .meta { color: #b2c0d4; }
-      .draft { color: #ffe4b4; background: #382814; border-color: #d7983f; }
     }
   </style>
 </head>
@@ -33,14 +33,14 @@
   <nav aria-label="Language"><a href="ko.html" lang="ko" hreflang="ko">한국어</a><strong aria-current="page">English</strong></nav>
   <main>
     <h1>Slivue Privacy Policy</h1>
-    <p class="meta">Google Play preparation draft · Package: <code>com.devdooly.slivue</code><br>Draft prepared: October 31, 2026 · Operator details updated: November 23, 2026 · Effective date: not yet set</p>
-    <aside class="draft" aria-label="Pre-release draft notice">
-      <strong>This is a review draft, not an effective or submission-ready policy.</strong>
-      <p>The public developer name is confirmed as DevDooly, the privacy contact email as vmdooly@gmail.com, and the GitHub Pages addresses below as the public policy URLs. Inquiry-retention rules are reflected in this draft, but the effective date has not yet been set. This review draft describes the planned first Google Play version. The final app's permissions, data handling, network activity, backup behavior and operating practices must be verified before the operator gives final approval to the whole policy. Do not submit it to Google Play or present it as an effective policy in this state.</p>
+    <p class="meta">Google Play distribution · Package: <code>com.devdooly.slivue</code><br>Effective date: November 23, 2026</p>
+    <aside class="notice" aria-label="Scope">
+      <strong>Notification display and filtering are processed on your device.</strong>
+      <p>This policy distinguishes Slivue's processing from processing by messaging apps, webpages and email services that you choose to use. Notification access is used only after your consent and Android permission.</p>
     </aside>
 
     <h2>1. Scope and operator details</h2>
-    <p>This draft applies only to the Google Play distribution of Slivue, <code>com.devdooly.slivue</code>. It does not apply unchanged to the GitHub direct distribution, <code>com.devdooly.notificationedge</code>, whose updater, optional fonts and backup behavior differ.</p>
+    <p>This policy applies to the Google Play distribution of Slivue, <code>com.devdooly.slivue</code>. It does not apply unchanged to the GitHub direct distribution, <code>com.devdooly.notificationedge</code>, whose updater, optional fonts and backup behavior differ.</p>
     <dl>
       <dt>Operator (public developer name)</dt><dd>DevDooly</dd>
       <dt>Privacy contact</dt><dd>vmdooly@gmail.com</dd>
@@ -49,19 +49,19 @@
     </dl>
     <p>The two distributions are separate apps and can be installed together. Settings, permissions and notification history from the direct distribution do not automatically transfer to the new Play app.</p>
 
-    <h2>2. Information and purposes covered by the design</h2>
+    <h2>2. Information and purposes</h2>
     <ul>
       <li><strong>Notifications:</strong> After you accept the in-app disclosure and grant Android notification access, Slivue reads notification titles, text, displayed senders, app identifiers and names, timestamps, conversation messages and reply actions. These support recent notification display, conversation grouping, app and keyword filters, quick replies and optional edge lighting.</li>
-      <li><strong>Quick replies:</strong> Text you choose to send is passed through Android's notification reply action to the original messaging app. That app handles subsequent delivery and retention under its own policy.</li>
+      <li><strong>Quick replies:</strong> Text you enter and choose to send is passed through Android's notification reply action to the original messaging app. That app handles subsequent delivery and retention under its own policy.</li>
       <li><strong>Preferences:</strong> Handle, panel and lighting appearance, selected fonts, detected and excluded apps, blocked keywords and your chosen launch and gesture options are stored in the app's internal storage.</li>
-      <li><strong>Imported fonts:</strong> A font file you select through Android's file picker and its filename are copied to internal app storage for display. The Play version is being prepared to use system and imported fonts without a downloadable Google Fonts provider.</li>
-      <li><strong>Consent and pause state:</strong> The disclosure version, consent time and processing pause state are recorded on the device. Consent is kept outside Android backup so it cannot authorize notification access on another device.</li>
-      <li><strong>Optional pause-before-opening:</strong> If you enable this option and open the panel, Slivue can check active media-session apps and playback states and send a pause command to supported video sessions. This is not microphone or screen recording.</li>
+      <li><strong>Imported fonts:</strong> A font file you select through Android's file picker and its filename are copied to internal app storage for display. The Play version uses system and imported fonts without a downloadable Google Fonts provider.</li>
+      <li><strong>Consent and pause state:</strong> The disclosure version, consent time and processing pause state are recorded on the device. Consent is stored outside Android backup to avoid reusing a transferred consent record as authorization on another device.</li>
+      <li><strong>Optional pause-before-opening:</strong> When this option is enabled and you open the panel, Slivue can check active media-session apps and playback states and send a pause command to supported video sessions. This is not microphone or screen recording.</li>
     </ul>
-    <p>When consent, notification access and the service are active and processing is not paused, Slivue can process notifications while its settings screen is not visible. It does not restore sensitive content hidden by Android or the original app or bypass their protections.</p>
+    <p>When current consent, actual notification access and the service are active and processing is not paused, Slivue can process notifications while its settings screen is not visible. It does not restore sensitive content hidden by Android or the original app or bypass their protections.</p>
 
     <h2>3. Transfers and external services</h2>
-    <p>The planned first Play version processes notification display and filtering on the device without uploading notification content or replies to a Slivue developer server. The Play artifact is being prepared without the GitHub APK self-updater, downloadable fonts, raw notification diagnostic export, advertising, analytics or login SDKs, or its own Internet permission. Until the final artifact, transitive dependencies and actual network activity have been checked, this design is not a verified “no collection or sharing” declaration.</p>
+    <p>The Play version displays and filters notifications on the device and does not provide a feature that automatically uploads notification content or replies to a Slivue developer server. It does not include its own Internet permission, the GitHub APK self-updater, a downloadable-font provider, raw notification diagnostic export, or advertising, analytics or login SDKs. This does not mean that the user-directed transfers to original apps or the external-service processing described below do not occur.</p>
     <p>When you send a quick reply or open a notification's original app, Android passes that action to the app you chose. Opening the public policy or a store page in an external browser or store may let that external service process connection information under its own policies. Slivue does not attach notification text to those links.</p>
     <p>The public policy pages are hosted on GitHub Pages. When you visit a page, GitHub may process connection information such as your IP address, browser information and access time under the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>. This is separate from the Slivue app uploading notification content.</p>
     <p>Privacy inquiries are received at vmdooly@gmail.com using Google Gmail. The operator processes the sender address and information you choose to email in order to respond, and Google processes this information as the email service provider under the <a href="https://policies.google.com/privacy?hl=en">Google Privacy Policy</a>. Do not attach real messages, verification codes or unnecessary information about other people.</p>
@@ -70,31 +70,31 @@
     <h2>4. Retention and deletion</h2>
     <ul>
       <li>Notification history is held in app memory with limits of 150 notifications and 50 messages per notification. New notifications may replace older entries.</li>
-      <li>Removing a notification from Android's notification shade and clearing Slivue's history are different operations. The planned controls clear in-memory history when you clear it in Slivue, stop all processing, withdraw consent or revoke notification access.</li>
-      <li>Memory history is lost when the process ends. Android notifications that remain active can be read again if consent and permission conditions are met later. Ending the process is therefore not permanent deletion of the original notifications.</li>
+      <li>Removing a notification from Android's notification shade and clearing Slivue's history are different operations. Slivue clears its in-memory history when you clear it in Slivue, stop all processing, withdraw consent or revoke notification access.</li>
+      <li>Memory history is lost when the process ends. Android notifications that remain active can be read again if consent and permission conditions are met later. Ending the process is therefore not permanent deletion of the original app's or Android's notifications.</li>
       <li>Detected apps, blocked keywords and excluded-app preferences may remain until you change or delete them in Slivue or clear its app data in Android settings. Stopping processing or clearing notification history does not necessarily remove appearance and filter preferences.</li>
       <li>Imported fonts can be removed through the app's font deletion control, Android app-data deletion or app removal. The original file you selected is separate from Slivue's internal copy.</li>
     </ul>
 
     <h2>5. Backup and device transfer</h2>
-    <p>The Play version is being prepared with rules excluding internal app settings and files from cloud backup and device-to-device transfer. Consent records use a separate location that is not backed up. The behavior of manufacturer transfer tools and Android versions still requires testing with the final build; this is not an absolute guarantee that no device-transfer mechanism can ever copy data. The direct distribution has a different existing settings-backup policy.</p>
+    <p>The Play version uses rules excluding internal app settings and files from Android cloud backup and device-to-device transfer, and consent records use a separate location that is not backed up. Android versions and manufacturers' transfer tools may behave differently; app settings do not guarantee control over every transfer method or a copy that a user makes separately. The direct distribution has a different existing settings-backup policy.</p>
 
     <h2>6. Permissions and your choices</h2>
     <ul>
       <li><strong>Notification access:</strong> You choose whether to grant it in Android settings after a separate in-app disclosure and affirmative consent. You may decline and still read settings and this policy, but the notification panel's core features will be limited.</li>
       <li><strong>Display over other apps:</strong> Shows the handle and edge lighting while you use another app. You can revoke it in Android settings.</li>
       <li><strong>Send notifications:</strong> Shows service status and a stop action on supported Android versions. It is separate from permission to read other apps' notifications.</li>
-      <li><strong>Stop and resume processing:</strong> The planned settings and service notification let you stop all processing. Resuming requires current consent and actual system permissions.</li>
+      <li><strong>Stop and resume processing:</strong> You can stop all processing in Slivue settings or the service notification. Resuming requires current consent and actual system permissions.</li>
       <li><strong>Withdraw consent:</strong> You can withdraw consent in the app or revoke Android notification access. New notification processing stops; using it again requires the disclosure and permission conditions to be met.</li>
       <li><strong>Battery optimization:</strong> Reviewing battery restrictions is optional on devices that limit background display. Slivue does not forcibly disable battery protection.</li>
     </ul>
-    <p>The notification-panel design does not add an accessibility service, SMS or call-log access, microphone, camera, location or broad storage access. You choose an individual font file through the system file picker.</p>
+    <p>The app does not request an accessibility service, SMS or call-log access, microphone, camera, location or broad storage access for notification display. You choose an individual font file through the system file picker.</p>
 
     <h2>7. Security, children and changes</h2>
-    <p>The design uses internal storage and Android permission boundaries and limits sensitive notification content in logs and support material. No software can promise absolute security. Do not attach real messages, verification codes or unnecessary information about other people to support requests.</p>
-    <p>No separate Slivue account-creation feature is in scope. The intended users are teenagers and adults in the age groups 13–15, 16–17, and 18 and over. The app is not designed primarily for children under 13. This target-audience selection does not determine an IARC content rating or mean that users aged 13 and over fall outside child-related requirements in every distribution country. The content rating is determined separately through responses to the actual IARC questionnaire, and child- and teen-related requirements in each distribution country must be reviewed before release.</p>
-    <p>Material changes to information, purposes, transfers or advertising require an updated policy and store declarations, and a new disclosure or consent when needed. The effective date and change-notice process must be set before final publication.</p>
+    <p>The app uses internal storage and Android permission boundaries and limits sensitive notification content in logs and support material. No software can promise absolute security. Do not attach real messages, verification codes or unnecessary information about other people to support requests.</p>
+    <p>Slivue does not provide separate account creation or login. The intended users are teenagers and adults in the age groups 13–15, 16–17, and 18 and over. The app is not designed primarily for children under 13. These target-audience age groups are separate from an IARC content rating; being aged 13 or over does not mean exemption from child-related requirements in every distribution country. The operator checks the child- and teen-related requirements in distribution countries and adjusts availability when necessary.</p>
+    <p>Material changes to information, purposes, transfers or advertising require an updated public policy and store declarations, with necessary in-app notices. A new disclosure or consent is requested when needed, and the changed policy states its effective date.</p>
   </main>
-  <footer>This pre-release draft was prepared on October 31, 2026. The public developer name, contact email, public policy URLs and inquiry-retention rules were added on November 23, 2026. It is not a final submission policy until the effective date is set, the final Play artifact and operating practices have been verified and the operator has given final approval to the whole policy.</footer>
+  <footer>Effective date: November 23, 2026 · Slivue Google Play distribution · Privacy contact: vmdooly@gmail.com</footer>
 </body>
 </html>

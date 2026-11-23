@@ -1,14 +1,14 @@
 # Slivue 개인정보·권한·Data safety 준비서
 
-## 2026-11-23 운영 정보 확정과 남은 승인
+## 2026-11-23 최종 정책 채택과 남은 신고 검증
 
 공개 개발자 표시 이름은 **DevDooly**, 지원·개인정보 문의 이메일은 **vmdooly@gmail.com**으로 사용자 확정했다. 법적 신원·지역별 공개 의무는 실제 계정과 운영 상황에서 확인한다. 문의 메일 수신 시험과 요청 처리·보유·삭제 안내도 최종 정책 검토에 포함한다.
 
 사용자는 기존 계정 종료가 휴면·장기 미사용이었다고 확인했고, 신규 Play Console 계정 생성·본인인증을 완료했다고 확인했다. 이 사용자 확인은 앱 생성·데이터 보안 신고·FGS 심사·정책 승인·게시 완료와 별개다.
 
-별도 Play 업로드 키는 로컬 생성·개인키 검증까지 완료했으며 이동 가능한 백업·Console 등록·서명 AAB는 별도다. 이 키 준비를 정책 최종 승인이나 Data safety 신고 완료의 증거로 쓰지 않는다.
+별도 Play 업로드 키의 로컬 생성·개인키 검증과 이번 최종 정책을 넣은 서명 AAB 생성을 완료했다. 이동 가능한 백업·Console 등록·실제 Play 설치는 별도다. 이 키와 파일 준비를 Data safety 신고 완료의 증거로 쓰지 않는다.
 
-GitHub Pages 정책 공개와 한국어 `https://devdooly.github.io/Slivue/privacy/ko.html`·영어 `https://devdooly.github.io/Slivue/privacy/en.html` 주소는 승인받았다. 다만 **호스팅 공개 승인과 방침 내용의 최종 승인은 다르다.** 배포 뒤 실제 HTTP 접근, 한영·앱 자산 일치, 문의 정보와 최종 시행일을 검증하고 운영자 승인을 받기 전에는 `draft`를 해제하거나 제출용 최종 정책으로 표시하지 않는다.
+GitHub Pages 정책 공개와 한국어 `https://devdooly.github.io/Slivue/privacy/ko.html`·영어 `https://devdooly.github.io/Slivue/privacy/en.html` 주소에 이어, 사용자가 한·영 최종 문안과 시행일 **2026-11-23**을 채택했다. 승인한 전문을 공개 원본·앱 자산에 동일하게 반영하고 최종 갱신본의 실제 HTTP 접근과 일치를 확인한다. 이 채택은 Data safety 신고·최종 실제 통신 검사·Play 심사 결과를 대신하지 않는다.
 
 정책은 **`com.devdooly.slivue` Slivue Play판만** 다룬다. 직접 배포판의 통신·폰트·백업 차이, Thumbbridge 또는 개발자의 다른 앱까지 같은 방침으로 확장하지 않는다. Data safety의 “수집·공유 없음”도 연락처 확정만으로 승인하지 않는다. 최종 AAB·SDK·실제 전송·다른 앱 전달·삭제/백업과 맞는 신고를 소유자가 확인해야 한다. [신고 공식 안내](https://support.google.com/googleplay/android-developer/answer/10787469?hl=en)
 
