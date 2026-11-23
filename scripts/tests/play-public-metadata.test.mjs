@@ -21,6 +21,15 @@ const inquiryRetention = {
   ],
 };
 
+test('한글 업로드 helper는 Windows PowerShell 5.1이 읽을 수 있는 UTF-8 BOM을 유지한다', async () => {
+  const bytes = await readFile(new URL('scripts/prepare-play-upload.ps1', root));
+  assert.equal(bytes.subarray(0, 3).toString('hex'), 'efbbbf',
+    'Windows PowerShell 5.1은 BOM 없는 한글 스크립트를 ANSI로 해석할 수 있습니다.');
+  assert.notEqual(bytes.subarray(3, 6).toString('hex'), 'efbbbf', 'BOM을 중복해서 넣지 않습니다.');
+  const script = new TextDecoder('utf-8', { fatal: true }).decode(bytes.subarray(3));
+  assert.match(script, /^#requires -Version 5\.1\r?\n/);
+});
+
 // 공개 파일은 비밀 값이나 모호한 Java Properties 이스케이프가 없는 단순 UTF-8 형식으로 유지한다.
 async function publicMetadata() {
   const text = await readFile(new URL('config/play-public.properties', root), 'utf8');

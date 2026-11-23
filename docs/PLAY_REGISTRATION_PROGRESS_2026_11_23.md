@@ -38,11 +38,13 @@
 
 ## 검증 결과와 한계
 
-- Node 회귀 **45개 통과**: 소개 15개, 기존 AAB 검사 22개, 공개 운영 정보 3개, 정책 사이트 5개.
+- Node 회귀 **46개 통과**: 소개 15개, 기존 AAB 검사 22개, 공개 운영 정보·Windows 스크립트 인코딩 4개, 정책 사이트 5개.
+- 업로드 준비 스크립트의 UTF-8 BOM 누락을 보완하고 Windows PowerShell 5.1·PowerShell 7에서 실제 구문 분석과 키 `Inspect` 성공을 확인했다. 기존 개인키·비밀 파일은 변경하지 않았다.
 - 허용한 HTML 4개만 생성했고 공개 원문·앱 자산이 일치함을 확인했다. 예상 밖 파일·비밀 설정·링크·출력 경로 이탈은 배포하지 않는다.
 - 생성한 키를 사용하는 실제 `verifyPlaySubmissionReady`는 **초안·최종 승인·시행일 미완료로 정상 실패**했다. 키·이름·이메일·URL을 입력한 것만으로 제출 준비가 완료되지 않는다.
 - 이 PC의 기존 `local.properties`에 지정된 Android SDK 디렉터리가 없어 로컬 앱 전체 빌드는 진행하지 못했다. 저장소의 표준 명령 `testDebugUnitTest compileDebugKotlin lintRelease assembleRelease`를 원격 빌드에서 함께 실행하도록 구성했다. 로컬 실패를 앱 소스 성공이나 로컬 검증 통과로 기록하지 않는다.
 - 준비 구현 커밋 `12bd530`의 [표준 빌드](https://github.com/DevDooly/Slivue/actions/runs/45127345886), [Play 미서명 후보 검증](https://github.com/DevDooly/Slivue/actions/runs/45127345786), [정책 사이트 배포](https://github.com/DevDooly/Slivue/actions/runs/45127345831), [CodeQL](https://github.com/DevDooly/Slivue/actions/runs/45127345795)이 통과했다. 표준 빌드는 두 배포 변형의 단위 테스트·컴파일·린트·릴리스를 실제 실행했다.
+- 문의 삭제 기준 후속 커밋 `a0463d7`의 [표준 빌드](https://github.com/DevDooly/Slivue/actions/runs/45129891360), [Play 미서명 후보 검증](https://github.com/DevDooly/Slivue/actions/runs/45129891460), [정책 사이트 배포](https://github.com/DevDooly/Slivue/actions/runs/45129891534), [CodeQL](https://github.com/DevDooly/Slivue/actions/runs/45129891505)도 통과했다. 이후 실제 공개 페이지의 새 삭제 문구·HTTP 200·원문 및 앱 자산 일치를 다시 확인했다. Windows 기본 PowerShell에서 실행한 제출 준비 검사도 초안·최종 승인·시행일 미완료로 정상 실패했다.
 - [직접 배포판 v1.3.29](https://github.com/DevDooly/Slivue/releases/tag/v1.3.29)를 공개했다. 내려받은 APK의 SHA-256은 `bb73e0b10925470c664d700fd98cd869dfa4337e4b57a892e054040ec6e23295`이며, 공개 체크섬·GitHub 자산 해시가 일치하고 공식 `apksig` 라이브러리로 서명을 확인했다. 이는 Play판 출시나 최종 정책 승인 결과가 아니다.
 - 실제 Console의 앱 생성, Play App Signing 약관·키 등록, AAB 업로드, Data safety/FGS 신고, 비공개 테스트·심사·게시를 수행한 것은 아니다.
 

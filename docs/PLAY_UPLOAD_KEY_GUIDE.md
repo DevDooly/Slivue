@@ -6,6 +6,8 @@
 
 저장소에서 Windows PowerShell 5.1 이상과 JDK의 `keytool`을 사용한다. `JAVA_HOME/bin/keytool.exe`를 먼저 찾고, 없으면 `PATH`에서 찾는다.
 
+이 스크립트는 한국어를 포함하므로 **UTF-8 BOM 인코딩을 유지한다.** Windows PowerShell 5.1은 BOM 없는 파일을 시스템 ANSI 코드 페이지로 읽어 구문 오류를 일으킬 수 있다. PowerShell 7에서도 같은 파일을 사용할 수 있으며, 편집·포맷 과정에서 BOM을 제거하지 않는다.
+
 ```powershell
 # 기본 동작: 존재 여부 확인. 키가 있으면 개인키 항목과 복호 가능성을 검증하고 공개 인증서만 출력
 .\scripts\prepare-play-upload.ps1
