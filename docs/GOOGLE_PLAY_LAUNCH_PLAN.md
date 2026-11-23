@@ -9,6 +9,7 @@
 - 사용자가 Slivue Play 정책의 GitHub Pages 공개를 승인했다. 한국어 `https://devdooly.github.io/Slivue/privacy/ko.html`, 영어 `https://devdooly.github.io/Slivue/privacy/en.html`을 사용하되 실제 공개 접근 성공·정책 최종 내용 승인·시행일은 별도 검증한다. 내용 승인 전 정책 상태는 초안으로 유지한다.
 - 독립 업로드 키는 로컬 생성·개인키 검증을 완료했다. 이동 가능한 백업·Console 업로드 인증서/앱 서명 등록·서명 AAB는 아직 별도다. 실제 앱 생성·첫 AAB 업로드·FGS/Data safety 신고·심사·게시는 아직 확인하지 않았다.
 - 이번 정책 범위는 Slivue Play판뿐이다. Thumbbridge나 DevDooly의 다른 앱에 공통으로 적용하는 통합 방침을 만들지 않는다.
+- 사용자가 한국 포함·요건 충족 시 다국가 배포를 허용했고, 어린이용 기획이 아닌 **13~15세·16~17세·18세 이상 청소년·성인 대상**을 선택했다. [배포 국가·언어·연령 준비](GOOGLE_PLAY_DISTRIBUTION_AND_LOCALIZATION.md)의 해외 개별 후보, 실제 Console 선택과 IARC 등급 검토는 별도다.
 
 다음 순서는 **정책 게시·접근 검증 → 운영자 최종 검토·시행일 → 업로드 키 백업·제출 게이트 → Console 앱·서명·콘텐츠 입력 → 내부/해당 비공개 테스트 → 심사**다. 가입·신분증·약관·결제는 소유자가 확인하며 이 계획으로 대신 동의하지 않는다. 실제 입력값과 화면 순서는 [Console 입력 가이드](PLAY_CONSOLE_ENTRY_GUIDE.md), 완료 증거는 [제출 점검표](GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)에서 관리한다.
 

@@ -15,6 +15,8 @@
 
 ## 2. 확정한 배포 경계
 
+한국을 포함하고 요건 충족 시 여러 나라로 확대하는 방향, 청소년·성인 대상 **13~15세·16~17세·18세 이상**을 사용자가 선택했다. 초기 해외 후보와 언어 설정은 [배포 국가·언어·연령 준비](GOOGLE_PLAY_DISTRIBUTION_AND_LOCALIZATION.md)에 기록한다. 해외 개별 국가·대상 연령의 실제 Console 입력·IARC 등급은 아직 완료하지 않았다.
+
 | 항목 | Google Play판 | GitHub 직접 배포판 |
 | --- | --- | --- |
 | 설치 식별자 | `com.devdooly.slivue` | `com.devdooly.notificationedge` 유지 |
