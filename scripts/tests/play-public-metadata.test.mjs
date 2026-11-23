@@ -4,6 +4,22 @@ import { readFile } from 'node:fs/promises';
 
 const root = new URL('../../', import.meta.url);
 const publicKeys = ['playDeveloperName', 'playSupportEmail', 'playPrivacyPolicyUrl'];
+const inquiryRetention = {
+  ko: [
+    '운영자가 보관·관리하는 문의 정보',
+    '문의 처리 목적이 달성되면 지체 없이 삭제합니다.',
+    '법령상 보관 의무가 있는 경우',
+    '해당 의무가 적용되는 정보만 해당 기간 동안 별도로 보관합니다.',
+    'Gmail 서비스 자체의 보관·삭제 처리는 Google의 정책과 서비스 설정에 따릅니다.',
+  ],
+  en: [
+    'Inquiry information retained and managed by the operator',
+    'deleted without undue delay once the inquiry-handling purpose has been fulfilled.',
+    'If retention is legally required',
+    'only the information covered by that obligation is stored separately for the required period.',
+    "Gmail's own service-side retention and deletion are governed separately by Google's policies and service settings.",
+  ],
+};
 
 // 공개 파일은 비밀 값이나 모호한 Java Properties 이스케이프가 없는 단순 UTF-8 형식으로 유지한다.
 async function publicMetadata() {
@@ -53,5 +69,10 @@ for (const language of ['ko', 'en']) {
     assert.match(html, /<meta\s+name="slivue-policy-status"\s+content="(?:draft|final)"\s*>/);
     assert.ok(html.includes('com.devdooly.slivue'));
     if (metadata.playPrivacyPolicyUrl) assert.ok(html.includes(metadata.playPrivacyPolicyUrl));
+    for (const criterion of inquiryRetention[language]) {
+      assert.ok(html.includes(criterion), `${language}: 확정한 문의 보관 기준 또는 Gmail 처리 범위가 누락되었습니다.`);
+    }
+    assert.doesNotMatch(html, /문의 정보의 구체적인 보관·삭제 기준은 정식 시행 전에 확정|Specific retention and deletion rules for inquiry information will be set|effective date and inquiry-retention rules are set/,
+      '확정한 문의 보관 기준을 미정으로 표시하면 안 됩니다.');
   });
 }
